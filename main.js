@@ -27,14 +27,17 @@ const PR_CAP = IS_MOBILE ? 1.5 : 2;
 /* ---------- Renderer ---------- */
 const renderer = new THREE.WebGLRenderer({ antialias: !IS_MOBILE, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, PR_CAP));
-renderer.setSize(window.innerWidth, window.innerHeight);
+// size to the background box (covers the largest viewport, no bottom gap)
+const bgW = () => container.clientWidth || window.innerWidth;
+const bgH = () => container.clientHeight || window.innerHeight;
+renderer.setSize(bgW(), bgH());
 container.appendChild(renderer.domElement);
 
 /* ---------- Scene & camera ---------- */
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   55,
-  window.innerWidth / window.innerHeight,
+  bgW() / bgH(),
   0.1,
   200
 );
@@ -314,10 +317,10 @@ let heroLastW = window.innerWidth;
 window.addEventListener("resize", () => {
   if (IS_MOBILE && window.innerWidth === heroLastW) return;
   heroLastW = window.innerWidth;
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = bgW() / bgH();
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  composer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(bgW(), bgH());
+  composer.setSize(bgW(), bgH());
 });
 
 /* =========================================================

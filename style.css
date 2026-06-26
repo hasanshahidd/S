@@ -11,8 +11,9 @@
 
 html { scroll-behavior: smooth; overflow-x: hidden; }
 #hearts, #bg { overflow: hidden; max-width: 100vw; }
-/* the 3D background fills the screen and stays put while content scrolls */
-#bg { height: 100svh; }
+/* the 3D background must cover the LARGEST viewport so no gap shows at the
+   bottom when the mobile address bar hides */
+#bg, #hearts { height: 100vh; height: 100lvh; }
 
 body {
   background:
