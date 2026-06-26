@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shayan &middot; A Heart Full of Light</title>
+  <meta name="description" content="A tribute to Shayan, the kindest soul. A heart full of light." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Poppins:wght@200;300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div id="preloader">
+    <div class="loader-heart">&#10084;</div>
+    <div class="loader-count"><span id="count">0</span><i>%</i></div>
+    <div class="loader-label">loading something made with love</div>
+  </div>
+
+  <!-- 3D heart canvas lives here, fixed behind everything -->
+  <div id="bg"></div>
+
+  <!-- Soft floating hearts / petals overlay -->
+  <div id="hearts"></div>
+
+  <!-- Content -->
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <div class="hero-inner">
+        <p class="eyebrow reveal">for Shayan, with love</p>
+        <h1 class="title reveal">Shayan</h1>
+        <p class="subtitle reveal">A heart full of light.</p>
+        <button class="cta reveal" id="waitingBtn">
+          <span class="cta-dot"></span> press here, something is waiting for you
+        </button>
+        <div class="scroll-hint reveal">
+          <span>scroll</span>
+          <div class="scroll-line"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MESSAGE 1  (text | rose) -->
+    <section class="panel">
+      <div class="split">
+        <div class="col col-text reveal">
+          <div class="card">
+            <h2>Dear Shayan,</h2>
+            <p>
+              There are souls the world is simply softer for holding, and
+              you are one of them. Kindness seems to arrive in a room a breath
+              before you do, and stays long after you have gone.
+            </p>
+            <p>
+              I have watched you stay gentle on days that would have hardened
+              anyone else. So let this be a letter, written in light, for a heart
+              as rare and as loved as yours.
+            </p>
+          </div>
+        </div>
+        <div class="col col-model reveal">
+          <canvas class="mini" data-model="rose"></canvas>
+          <span class="model-label">a rose, that never wilts</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MESSAGE 2  (hearts | text) -->
+    <section class="panel">
+      <div class="split reverse">
+        <div class="col col-text reveal">
+          <div class="card">
+            <h2>When they try to dim you</h2>
+            <p>
+              Let the world say what it will. They mistake your softness for
+              weakness, never knowing it takes a quiet kind of courage to stay
+              kind while your own body grows tired.
+            </p>
+            <p>
+              You have carried more than most could lift, and still you choose
+              tenderness over bitterness. Whatever they take from you, they can
+              never touch this: you are deeply, fiercely loved, and you always
+              will be.
+            </p>
+          </div>
+        </div>
+        <div class="col col-model reveal">
+          <canvas class="mini" data-model="hearts"></canvas>
+          <span class="model-label">two hearts, beating as one</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MESSAGE 3  (text | butterfly) -->
+    <section class="panel">
+      <div class="split">
+        <div class="col col-text reveal">
+          <div class="card">
+            <h2>Should you ever forget</h2>
+            <p>
+              When the nights feel long and the world feels unkind, come back to
+              this little corner of light and remember who you are.
+            </p>
+            <p>
+              You are treasured beyond measure. Not for what you can do, nor for
+              how strong you feel today, but for the gentle, beautiful soul you
+              simply are. You have never walked this road alone, and as long as
+              I breathe, you never will.
+            </p>
+          </div>
+        </div>
+        <div class="col col-model reveal">
+          <canvas class="mini" data-model="butterfly"></canvas>
+          <span class="model-label">even broken wings still fly</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- LETTERS (interactive) -->
+    <section class="letters">
+      <h2 class="letters-title reveal">Letters, for when you need them</h2>
+      <p class="letters-sub reveal">open one whenever your heart feels heavy. each one is waiting just for you.</p>
+      <div class="envelopes">
+        <button class="envelope reveal" data-letter="0">
+          <span class="seal">&#10084;</span>
+          <span class="env-label">when you feel alone</span>
+          <span class="env-open">open</span>
+        </button>
+        <button class="envelope reveal" data-letter="1">
+          <span class="seal">&#10084;</span>
+          <span class="env-label">when they are unkind</span>
+          <span class="env-open">open</span>
+        </button>
+        <button class="envelope reveal" data-letter="2">
+          <span class="seal">&#10084;</span>
+          <span class="env-label">when you are tired</span>
+          <span class="env-open">open</span>
+        </button>
+        <button class="envelope reveal" data-letter="3">
+          <span class="seal">&#10084;</span>
+          <span class="env-label">when you forget your worth</span>
+          <span class="env-open">open</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- REASONS -->
+    <section class="reasons">
+      <h2 class="reasons-title reveal">Reasons you are loved</h2>
+      <p class="reasons-sub reveal">a few of the countless ones</p>
+      <div class="reason-grid">
+        <div class="reason reveal">
+          <span class="r-ico">&#10047;</span>
+          <h3>Your kindness</h3>
+          <p>You stay gentle with everyone, even when life has not been gentle with you.</p>
+        </div>
+        <div class="reason reveal">
+          <span class="r-ico">&#10047;</span>
+          <h3>Your courage</h3>
+          <p>You meet each day with a bravery most people will never have to know.</p>
+        </div>
+        <div class="reason reveal">
+          <span class="r-ico">&#10047;</span>
+          <h3>Your laugh</h3>
+          <p>It turns the most ordinary moments into the ones we never forget.</p>
+        </div>
+        <div class="reason reveal">
+          <span class="r-ico">&#10047;</span>
+          <h3>Your honesty</h3>
+          <p>You are real and true in a world that is so often pretending.</p>
+        </div>
+        <div class="reason reveal">
+          <span class="r-ico">&#10047;</span>
+          <h3>Your heart</h3>
+          <p>Big enough to hold everyone, soft enough to feel everything.</p>
+        </div>
+        <div class="reason reveal">
+          <span class="r-ico">&#10047;</span>
+          <h3>Your light</h3>
+          <p>Even on your darkest days, you still find a way to make the room brighter.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROMISES -->
+    <section class="promises">
+      <h2 class="promises-title reveal">Things we will still do</h2>
+      <p class="promises-sub reveal">because your story is far from over</p>
+      <ul class="promise-list">
+        <li class="reveal"><span>&#10084;</span> Watch the sun rise over the fields, the way we always said we would.</li>
+        <li class="reveal"><span>&#10084;</span> Laugh until our stomachs hurt over absolutely nothing.</li>
+        <li class="reveal"><span>&#10084;</span> Take that trip we keep promising ourselves.</li>
+        <li class="reveal"><span>&#10084;</span> Grow old as the same stubborn, ridiculous friends.</li>
+        <li class="reveal"><span>&#10084;</span> Beat this, together, one quiet and brave day at a time.</li>
+      </ul>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="gallery">
+      <h2 class="gallery-title reveal">Moments</h2>
+      <p class="gallery-sub reveal">a few frames of the light you bring</p>
+      <div class="frames">
+        <figure class="frame reveal f1" data-photo="0">
+          <img src="images/shayan-1.jpg" alt="Shayan" loading="lazy"
+               onerror="this.parentElement.classList.add('empty')" />
+        </figure>
+        <figure class="frame reveal f2" data-photo="1">
+          <img src="images/shayan-2.jpg" alt="Shayan" loading="lazy"
+               onerror="this.parentElement.classList.add('empty')" />
+        </figure>
+        <figure class="frame reveal f3" data-photo="2">
+          <img src="images/shayan-3.jpg" alt="Shayan" loading="lazy"
+               onerror="this.parentElement.classList.add('empty')" />
+        </figure>
+        <figure class="frame reveal f4" data-photo="3">
+          <img src="images/shayan-4.jpg" alt="Shayan" loading="lazy"
+               onerror="this.parentElement.classList.add('empty')" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- CLOSING -->
+    <section class="closing">
+      <div class="reveal">
+        <div class="portrait portrait-lg" data-photo="3">
+          <img src="images/shayan-4.jpg" alt="Shayan" loading="lazy"
+               onerror="this.style.display='none'" />
+        </div>
+        <p class="closing-line">Keep shining, gentle one. The world is so much brighter for having you in it.</p>
+        <h2 class="closing-title">Yours, always.</h2>
+        <p class="signature">&#10084; for Shayan</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Letter modal -->
+  <div class="letter-modal" id="letterModal" hidden>
+    <div class="letter-backdrop"></div>
+    <div class="letter-paper">
+      <button class="letter-close" id="letterClose" aria-label="close">&times;</button>
+      <div class="letter-photo" id="letterPhoto"></div>
+      <h3 class="letter-h" id="letterH"></h3>
+      <div class="letter-body" id="letterBody"></div>
+      <p class="letter-sign">&#10084; always yours</p>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
