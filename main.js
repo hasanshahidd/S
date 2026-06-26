@@ -309,8 +309,11 @@ function animate() {
 }
 animate();
 
-/* ---------- Resize ---------- */
+/* ---------- Resize (ignore mobile address-bar height-only changes) ---------- */
+let heroLastW = window.innerWidth;
 window.addEventListener("resize", () => {
+  if (IS_MOBILE && window.innerWidth === heroLastW) return;
+  heroLastW = window.innerWidth;
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -372,7 +375,12 @@ function createMini(canvas, build, opts = {}) {
   }
   resize();
   loop();
-  window.addEventListener("resize", resize);
+  let lastW = window.innerWidth;
+  window.addEventListener("resize", () => {
+    if (IS_MOBILE && window.innerWidth === lastW) return; // skip address-bar toggles
+    lastW = window.innerWidth;
+    resize();
+  });
 }
 
 function pts(geo, size, color) {
