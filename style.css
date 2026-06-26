@@ -10,7 +10,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html { scroll-behavior: smooth; overflow-x: hidden; }
-html, body { width: 100%; overflow-x: clip; overscroll-behavior: none; }
 #hearts, #bg { overflow: hidden; max-width: 100vw; }
 /* the 3D background fills the screen and stays put while content scrolls */
 #bg { height: 100svh; }
