@@ -19,9 +19,14 @@ const COL = {
 
 const container = document.getElementById("bg");
 
+/* lighter graphics on phones so it stays smooth */
+const IS_MOBILE = window.matchMedia("(max-width: 820px)").matches ||
+  /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+const PR_CAP = IS_MOBILE ? 1.5 : 2;
+
 /* ---------- Renderer ---------- */
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({ antialias: !IS_MOBILE, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, PR_CAP));
 renderer.setSize(window.innerWidth, window.innerHeight);
 container.appendChild(renderer.domElement);
 
@@ -62,7 +67,7 @@ function insideHeart(x, y, z) {
   return a * a * a - x * x * z * z * z - (9 / 200) * y * y * z * z * z <= 0;
 }
 
-const COUNT = 15000;
+const COUNT = IS_MOBILE ? 6000 : 15000;
 const target = new Float32Array(COUNT * 3);
 const start = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
@@ -136,7 +141,7 @@ group.add(core);
 /* =========================================================
    Starfield (depth + parallax)
    ========================================================= */
-const STARS = 1100;
+const STARS = IS_MOBILE ? 400 : 1100;
 const starGeo = new THREE.BufferGeometry();
 const sPos = new Float32Array(STARS * 3);
 const sCol = new Float32Array(STARS * 3);
@@ -165,7 +170,7 @@ scene.add(starField);
 /* =========================================================
    Orbiting gold sparkles around the heart
    ========================================================= */
-const ORB = 220;
+const ORB = IS_MOBILE ? 90 : 220;
 const orbGeo = new THREE.BufferGeometry();
 const oPos = new Float32Array(ORB * 3);
 const oCol = new Float32Array(ORB * 3);
@@ -317,8 +322,8 @@ window.addEventListener("resize", () => {
    Each runs in its own canvas and only renders while on screen.
    ========================================================= */
 function createMini(canvas, build, opts = {}) {
-  const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  r.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const r = new THREE.WebGLRenderer({ canvas, antialias: !IS_MOBILE, alpha: true });
+  r.setPixelRatio(Math.min(window.devicePixelRatio, PR_CAP));
   const sc = new THREE.Scene();
   const cam = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
   cam.position.z = opts.dist || 5;
@@ -523,7 +528,7 @@ function heartPoints(n, scale) {
 
 /* --- 2. Two hearts, beating as one --- */
 function buildHearts(grp) {
-  const each = 1700;
+  const each = IS_MOBILE ? 900 : 1700;
   const a = heartPoints(each, 0.5);
   const b = heartPoints(each, 0.5);
   const N = each * 2;
@@ -555,7 +560,7 @@ function buildHearts(grp) {
 
 /* --- 3. A butterfly, wings gently flapping (even broken wings still fly) --- */
 function buildButterfly(grp) {
-  const N = 2600;
+  const N = IS_MOBILE ? 1400 : 2600;
   function wing(sign) {
     const p = new Float32Array(N * 3);
     const c = new Float32Array(N * 3);
@@ -619,16 +624,17 @@ document.querySelectorAll("canvas.mini").forEach((cv) => {
    Preloader, floating hearts, scroll reveals
    ========================================================= */
 const heartsLayer = document.getElementById("hearts");
-for (let i = 0; i < 30; i++) {
+const PETAL_N = IS_MOBILE ? 16 : 30;
+for (let i = 0; i < PETAL_N; i++) {
   const h = document.createElement("div");
   const petal = Math.random() < 0.45;
   h.className = petal ? "float-petal" : "float-heart";
   h.innerHTML = petal ? "&#10047;" : "&#10084;";
-  // bias some toward the empty side columns so the edges feel alive
+  // bias some toward the side columns, but keep them on-screen (max 88vw)
   const side = Math.random();
-  const x = side < 0.5 ? Math.random() * 22 : (side < 0.8 ? 78 + Math.random() * 22 : Math.random() * 100);
+  const x = side < 0.5 ? Math.random() * 20 : (side < 0.8 ? 68 + Math.random() * 18 : Math.random() * 86);
   h.style.left = x + "vw";
-  h.style.fontSize = (petal ? 10 : 8) + Math.random() * 22 + "px";
+  h.style.fontSize = (petal ? 10 : 8) + Math.random() * 18 + "px";
   h.style.animationDuration = 9 + Math.random() * 14 + "s";
   h.style.animationDelay = -Math.random() * 18 + "s";
   heartsLayer.appendChild(h);
