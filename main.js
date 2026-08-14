@@ -779,44 +779,11 @@ if (waitingBtn) {
 }
 
 /* =========================================================
-   Song + live lyrics (standard .lrc timings)
+   Song
    ========================================================= */
 const song = document.getElementById("song");
-const lyricLine = document.getElementById("lyricLine");
 const soundBtn = document.getElementById("soundBtn");
-
-let cues = [];   // [{ t: seconds, text }], sorted
-let curCue = -1;
-
-/* [mm:ss.xx] one line, repeated timestamps on a line are all valid cues */
-fetch("audio/song.lrc")
-  .then((r) => (r.ok ? r.text() : ""))
-  .then((txt) => {
-    cues = txt
-      .split(/\r?\n/)
-      .flatMap((line) => {
-        const text = line.replace(/\[.*?\]/g, "").trim();
-        return [...line.matchAll(/\[(\d+):(\d+(?:[.:]\d+)?)\]/g)].map((m) => ({
-          t: +m[1] * 60 + parseFloat(m[2].replace(":", ".")),
-          text,
-        }));
-      })
-      .sort((a, b) => a.t - b.t);
-  })
-  .catch(() => {});
-
 song.volume = 0.55;
-
-song.addEventListener("timeupdate", () => {
-  let i = cues.findIndex((c) => c.t > song.currentTime) - 1;
-  if (i < -1) i = cues.length - 1;          // past the final cue
-  if (i === curCue) return;
-  curCue = i;
-  lyricLine.textContent = i < 0 ? "" : cues[i].text;
-  lyricLine.classList.remove("in");
-  void lyricLine.offsetWidth;               // restart the fade
-  lyricLine.classList.add("in");
-});
 
 /* Resolves true on success, false if blocked or interrupted. Swallows the
    rejection either way (autoplay block, or an AbortError when a pause races a
