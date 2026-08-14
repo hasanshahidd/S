@@ -818,15 +818,22 @@ song.addEventListener("timeupdate", () => {
   lyricLine.classList.add("in");
 });
 
+/* Resolves true on success, false if blocked or interrupted. Swallows the
+   rejection either way (autoplay block, or an AbortError when a pause races a
+   still-pending play), so no caller can leak an uncaught rejection. */
 function playSong() {
-  return song.play().then(() => soundBtn.classList.add("playing"));
+  return song.play().then(
+    () => { soundBtn.classList.add("playing"); return true; },
+    () => { soundBtn.classList.remove("playing"); return false; }
+  );
 }
 
 /* Browsers block autoplay until the visitor interacts, so try it and fall
    back to starting on their first tap anywhere. */
 window.__startSong = () => {
-  playSong().catch(() => {
-    const kick = () => { playSong(); window.removeEventListener("pointerdown", kick); };
+  playSong().then((ok) => {
+    if (ok) return;
+    const kick = () => { window.removeEventListener("pointerdown", kick); playSong(); };
     window.addEventListener("pointerdown", kick);
   });
 };
