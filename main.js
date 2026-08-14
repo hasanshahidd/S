@@ -669,6 +669,7 @@ const tick = setInterval(() => {
 function launch() {
   preloader.classList.add("done");
   if (window.__startAssemble) window.__startAssemble();
+  if (window.__startSong) window.__startSong();
 
   if (window.gsap) {
     const tl = gsap.timeline({ delay: 0.5 });
@@ -776,6 +777,65 @@ if (waitingBtn) {
     openLetter(0);
   });
 }
+
+/* =========================================================
+   Song + live lyrics (standard .lrc timings)
+   ========================================================= */
+const song = document.getElementById("song");
+const lyricLine = document.getElementById("lyricLine");
+const soundBtn = document.getElementById("soundBtn");
+
+let cues = [];   // [{ t: seconds, text }], sorted
+let curCue = -1;
+
+/* [mm:ss.xx] one line, repeated timestamps on a line are all valid cues */
+fetch("audio/song.lrc")
+  .then((r) => (r.ok ? r.text() : ""))
+  .then((txt) => {
+    cues = txt
+      .split(/\r?\n/)
+      .flatMap((line) => {
+        const text = line.replace(/\[.*?\]/g, "").trim();
+        return [...line.matchAll(/\[(\d+):(\d+(?:[.:]\d+)?)\]/g)].map((m) => ({
+          t: +m[1] * 60 + parseFloat(m[2].replace(":", ".")),
+          text,
+        }));
+      })
+      .sort((a, b) => a.t - b.t);
+  })
+  .catch(() => {});
+
+song.volume = 0.55;
+
+song.addEventListener("timeupdate", () => {
+  let i = cues.findIndex((c) => c.t > song.currentTime) - 1;
+  if (i < -1) i = cues.length - 1;          // past the final cue
+  if (i === curCue) return;
+  curCue = i;
+  lyricLine.textContent = i < 0 ? "" : cues[i].text;
+  lyricLine.classList.remove("in");
+  void lyricLine.offsetWidth;               // restart the fade
+  lyricLine.classList.add("in");
+});
+
+function playSong() {
+  return song.play().then(() => soundBtn.classList.add("playing"));
+}
+
+/* Browsers block autoplay until the visitor interacts, so try it and fall
+   back to starting on their first tap anywhere. */
+window.__startSong = () => {
+  playSong().catch(() => {
+    const kick = () => { playSong(); window.removeEventListener("pointerdown", kick); };
+    window.addEventListener("pointerdown", kick);
+  });
+};
+
+soundBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (song.paused) playSong();
+  else { song.pause(); soundBtn.classList.remove("playing"); }
+});
 
 /* a small burst of hearts from the screen centre */
 function burstHearts() {

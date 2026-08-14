@@ -238,6 +238,13 @@
     </section>
   </main>
 
+  <!-- Song + live lyrics -->
+  <audio id="song" src="audio/song.mp3" loop preload="auto"></audio>
+  <div id="lyrics" aria-live="polite"><p id="lyricLine"></p></div>
+  <button id="soundBtn" class="sound-btn" aria-label="play or pause the music">
+    <span class="eq"><i></i><i></i><i></i></span>
+  </button>
+
   <!-- Letter modal -->
   <div class="letter-modal" id="letterModal" hidden>
     <div class="letter-backdrop"></div>
