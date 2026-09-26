@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { PALETTE, LETTER_LINES } from "./us.data.js";
+import { PALETTE, LETTER_FULL } from "./us.data.js";
 
 /* =========================================================
    UNDER ONE SKY  -  "what you left me"
@@ -16,9 +16,11 @@ import { PALETTE, LETTER_LINES } from "./us.data.js";
               a white display box holding his folded letter, a pencil
               drawing of the two of us hugging on its face, over the
               little cream card: "Hassan"
-     letter : the letter rises out of the white box, opens panel by
-              panel, and his words write themselves on, line by line,
-              each with a small red heart (exactly LETTER_LINES)
+     letter : the letter rises out of the white box ("Hi my ALIEN." at its
+              top) and opens panel by panel; the camera comes in until the
+              paper fills a reading window, and a real-text copy of the
+              whole letter (LETTER_FULL) fades in exactly over it. Further
+              scroll then moves his words up through that window
      air    : a few warm motes drifting in the light
    All procedural (the downloaded watch is a sports chronograph, not
    his plain dress watch): reflections come from three's RoomEnvironment.
@@ -44,11 +46,18 @@ const LID_T = 0.05, LID_L = BD + 0.07, FLAP_H = 0.36, LID_OPEN = 1.9;
 /* the letter: A-paper ratio, folded in three, writing inside */
 const LW = 1.1, LH = LW * Math.SQRT2, PH = LH / 3;
 const CREASE = 0.12, BOW = 0.012, EPS = 0.0025;
-const MAXL = 24; // wrapped handwriting lines the reveal shader tracks
+/* the greeting on the 3D paper, as fractions of the paper: left edge, baseline,
+   size. Mirrors .lt-letter-body's padding (8%, 6cqh) and .lt-greet's 4.5cqh,
+   so the real-text letter lands on it exactly */
+const GREET = { x: 0.08, y: 0.102, fs: 0.045 };
 
-/* scroll timeline (0..1 of the track): box and gifts move briskly so his
-   words get a third of the scroll and the finished letter a long hold */
-const TL = { lid: [0.04, 0.16], rise: [0.3, 0.46], top: [0.38, 0.45], bot: [0.42, 0.5], ink: [0.54, 0.86] };
+/* box timeline, 0..1 over the first boxSpan() px of scroll (the old track's span,
+   so the box keeps its pacing): box and gifts, the unfold, then the camera
+   comes in to read (cam) and his real-text letter fades in over the paper (read) */
+const TL = { lid: [0.04, 0.16], rise: [0.3, 0.46], top: [0.38, 0.45], bot: [0.42, 0.5], cam: [0.52, 0.66], read: [0.66, 0.72] };
+const READ_AT = 0.76;   // his words start moving at this point of the box timeline
+const READ_RATE = 1.3;  // px of scroll per px the letter moves: a touch slower than the page
+const boxSpan = () => (MQ.matches ? 1.6 : 2.2) * window.innerHeight;
 
 /* camera beats: look-at target, view direction, the w x h window to frame */
 const KEYS = [
@@ -57,7 +66,7 @@ const KEYS = [
   { p: 0.28, t: [0.05, 0.32, 0.1], d: [0.14, 1.25, 0.8], w: 2.95, h: 2.05 },
   { p: 0.4, t: [-0.2, 1.0, 0.1], d: [-0.06, 0.45, 1], w: 3.3, h: 2.8 },
   { p: 0.52, letter: 1 },
-  { p: 1.0, letter: 0.94 },
+  { p: 0.66, read: 1 }, // the paper fills the reading window (sized by .lt-letter)
 ];
 /* portrait screens: the lid framed on its printing, and the inside shown one
    column at a time (the chains, then the white box + watch) so a phone can
@@ -93,8 +102,8 @@ const SR_TEXT =
   "with a silver case, a black dial and a black leather strap; a small grey box with two thin " +
   "silver chains, a bracelet and a very thin chain for the neck; and a white box holding your " +
   "folded letter, a pencil drawing of the two of us hugging on its front, over a small cream card " +
-  "with my name, Hassan. Then the letter rises out of the white box and opens, and your words " +
-  "appear line by line, each with a small red heart. The same lines are written out below.";
+  "with my name, Hassan. Then the letter rises out of the white box and opens, and your whole " +
+  "letter is there to read.";
 
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const sstep = (a, b, v) => { const x = clamp((v - a) / (b - a)); return x * x * (3 - 2 * x); };
@@ -455,90 +464,20 @@ function drawPaper(c) {
   g.strokeRect(0, 0, W, H);
 }
 
-/* a small hand-drawn red heart, like the ones all over his page */
-function heart(g, x, y, s, rot) {
-  g.save();
-  g.translate(x, y);
-  g.rotate(rot);
-  g.beginPath();
-  g.moveTo(0, s * 0.42);
-  g.bezierCurveTo(-s * 1.05, -s * 0.2, -s * 0.5, -s * 0.95, 0, -s * 0.42);
-  g.bezierCurveTo(s * 0.5, -s * 0.95, s * 1.05, -s * 0.2, 0, s * 0.42);
-  g.closePath();
-  g.fillStyle = "#cf2a3f";
-  g.fill();
-  g.lineWidth = s * 0.09;
-  g.strokeStyle = "#8e1226";
-  g.stroke();
-  g.restore();
-}
-
-/* his words, ink only (transparent canvas), wrapped to fit; exactly LETTER_LINES,
-   never added to. Returns each wrapped line's band + writing order for the shader. */
+/* his greeting, ink only (transparent canvas), where GREET puts it: the one line
+   the 3D paper carries; the whole letter is real text laid over it (.lt-letter) */
 function drawInk(c) {
   const g = c.getContext("2d"), W = c.width, H = c.height;
   g.clearRect(0, 0, W, H);
-  // the phone canvas: narrower margins and a taller block, so the hand reads bigger
-  const small = W < 800, mx = W * (small ? 0.065 : 0.09), aw = W - 2 * mx, fitH = H * (small ? 0.9 : 0.86);
-  let fs = W * 0.1, lh = 0, gap = 0, rows = [], total = 0;
-  const lay = () => {
-    g.font = `600 ${fs}px ${HAND}`;
-    lh = fs * 1.3;
-    gap = fs * 0.4;
-    rows = [];
-    LETTER_LINES.forEach((text, fi) => {
-      const out = [];
-      let cur = "";
-      for (const word of text.split(/\s+/).filter(Boolean)) {
-        const next = cur ? `${cur} ${word}` : word;
-        if (cur && g.measureText(next).width > aw) { out.push(cur); cur = word; }
-        else cur = next;
-      }
-      if (cur) out.push(cur);
-      const lastLine = out[out.length - 1] || "";
-      if (g.measureText(lastLine).width + fs * 0.9 > aw && lastLine.includes(" ")) { // the heart must fit too
-        const k = lastLine.lastIndexOf(" ");
-        out.splice(out.length - 1, 1, lastLine.slice(0, k), lastLine.slice(k + 1));
-      }
-      out.forEach((s, j) => rows.push({ s, fi, heart: j === out.length - 1 }));
-    });
-    total = rows.length * lh + (LETTER_LINES.length - 1) * gap;
-  };
-  lay();
-  for (let k = 0; k < 40 && (total > fitH || rows.length > MAXL); k++) { fs *= 0.97; lay(); }
-
-  const R = rng(17), lines = [], spans = [];
-  g.textAlign = "left";
+  g.font = `600 ${H * GREET.fs}px ${HAND}`;
+  g.fillStyle = INK;
   g.textBaseline = "alphabetic";
-  let y = Math.max(H * (small ? 0.05 : 0.07), (H - total) / 2 - H * 0.02) + lh * 0.72, acc = 0;
-  rows.forEach((r, i) => {
-    if (i && rows[i - 1].fi !== r.fi) { y += gap; acc += aw * 0.28; } // a breath between fragments
-    const w = g.measureText(r.s).width, x = mx + (R() - 0.5) * fs * 0.25;
-    g.save();
-    g.translate(x, y);
-    g.rotate((R() - 0.5) * 0.014);
-    g.fillStyle = INK;
-    g.fillText(r.s, 0, 0);
-    let end = w;
-    if (r.heart) {
-      const hs = fs * 0.44, hx = w + fs * 0.5;
-      heart(g, hx, -fs * 0.3, hs, (R() - 0.5) * 0.5);
-      end = hx + hs;
-    }
-    g.restore();
-    // band in uv (v = 1 at the top): [vTop, vBottom, uStart, uEnd]
-    // (reaches past the next row's top so descenders write on with their own row)
-    lines.push([1 - (y - lh * 0.8) / H, 1 - (y + lh * 0.36) / H, (x - fs * 0.3) / W, (x + end + fs * 0.3) / W]);
-    spans.push([acc, acc + end]);
-    acc += end + aw * 0.04;
-    y += lh;
-  });
-  return { lines, spans: spans.map(([a, b]) => [a / acc, b / acc]), count: Math.min(rows.length, MAXL) };
+  g.fillText(LETTER_FULL.greeting, W * GREET.x, H * GREET.y);
 }
 
 /* every canvas the scene paints, per screen class: [cache key, w, h, draw, font] */
 function artSpec(mobile) {
-  const PL = mobile ? 1024 : 1536, IL = mobile ? 1024 : 1792, HW = mobile ? 768 : 1024;
+  const PL = mobile ? 1024 : 1536, HW = mobile ? 768 : 1024;
   const paper = [`paper${PL}`, Math.round(PL / Math.SQRT2), PL, drawPaper];
   return {
     lid: [`lid${mobile}`, mobile ? 768 : 1024, mobile ? 543 : 724, drawLidTop],
@@ -551,7 +490,7 @@ function artSpec(mobile) {
     fade: ["fade", 256, 256, drawFade],
     paper,
     hug: [`hug${PL}`, HW, Math.round((HW * Math.SQRT2) / 3), (c) => drawHug(c, art(...paper).c)],
-    ink: [`ink${IL}`, Math.round(IL / Math.SQRT2), IL, drawInk, HAND_FAMILY],
+    ink: [`ink${PL}`, Math.round(PL / Math.SQRT2), PL, drawInk, HAND_FAMILY],
   };
 }
 
@@ -602,30 +541,14 @@ function panelGeo(v0, dy, segX) {
 }
 
 /* ---------- shaders ---------- */
-/* ink write-on, patched into the paper's MeshStandardMaterial: each wrapped
-   line has a uv band and a slot in the writing order; ink shows left to
-   right behind a soft wet edge as uReveal runs 0..1 */
-const INK_DECL = /* glsl */ `
-uniform sampler2D uInk;
-uniform float uReveal;
-uniform vec4 uLine[${MAXL}];
-uniform vec2 uSpan[${MAXL}];
-uniform int uCount;
-`;
+/* his greeting, patched into the paper's MeshStandardMaterial. uKx is the paper's
+   current stretch to the reading window's shape: the ink is sampled against it
+   (about the greeting's left edge) so the handwriting itself never stretches */
 const INK_FRAG = /* glsl */ `
 {
-  vec4 ink = texture2D(uInk, vMapUv);
-  float show = step(0.999, uReveal);
-  for (int i = 0; i < ${MAXL}; i++) {
-    if (i >= uCount) break;
-    vec4 L = uLine[i];
-    if (vMapUv.y <= L.x && vMapUv.y > L.y) {
-      float k = clamp((uReveal - uSpan[i].x) / max(uSpan[i].y - uSpan[i].x, 1e-4), 0.0, 1.0);
-      show = max(show, k >= 1.0 ? 1.0 : clamp((mix(L.z, L.w, k) - vMapUv.x) / 0.02, 0.0, 1.0));
-    }
-  }
-  diffuseColor.rgb = mix(diffuseColor.rgb, ink.rgb, ink.a * show);
-  totalEmissiveRadiance *= 1.0 - ink.a * show; // the paper glows, the ink stays dark
+  vec4 ink = texture2D(uInk, vec2(${GREET.x.toFixed(3)} + (vMapUv.x - ${GREET.x.toFixed(3)}) * uKx, vMapUv.y));
+  diffuseColor.rgb = mix(diffuseColor.rgb, ink.rgb, ink.a);
+  totalEmissiveRadiance *= 1.0 - ink.a; // the paper glows, the ink stays dark
 }`;
 
 /* warm motes: soft points rising slowly through the light, fading at both ends */
@@ -672,9 +595,51 @@ export function mount(el) {
   const capBox = Object.assign(document.createElement("div"), { className: "lt-cap" });
   capBox.setAttribute("aria-hidden", "true"); // same words as the paragraph above
   const capEls = CAPS.map(([text]) => capBox.appendChild(Object.assign(document.createElement("span"), { textContent: text })));
-  stage.append(sr, capBox);
+
+  // his whole letter, once, as real text: laid exactly over the 3D paper when it
+  // has opened (or, without WebGL, a plain paper card in the flow). Each "~" is
+  // one of his little red hearts
+  const sheet = Object.assign(document.createElement("div"), { className: "lt-letter" });
+  sheet.setAttribute("role", "article");
+  sheet.setAttribute("aria-label", "His letter");
+  const body = sheet.appendChild(Object.assign(document.createElement("div"), { className: "lt-letter-body" }));
+  const para = (text, cls) => {
+    const p = Object.assign(document.createElement("p"), cls ? { className: cls } : {});
+    text.split("~").forEach((part, i, all) => {
+      p.append(part);
+      if (i < all.length - 1) {
+        const h = Object.assign(document.createElement("span"), { className: "lt-heart", textContent: "♥︎" });
+        h.setAttribute("aria-hidden", "true");
+        p.append(h);
+      }
+    });
+    return p;
+  };
+  body.append(para(LETTER_FULL.greeting, "lt-greet"), ...LETTER_FULL.paragraphs.map((t) => para(t)), para(LETTER_FULL.closing, "lt-close"));
+
+  stage.append(sr, capBox, sheet);
   el.classList.add("lt-ready");
-  window.ScrollTrigger?.refresh(); // track just grew: later reveals need fresh positions
+
+  /* scroll plan in px, re-measured on resize and when the fonts change the
+     letter's height: the box timeline over the old track's span, then his
+     words move up through the window (READ_RATE px of scroll per px of text),
+     then a short rest before the section scrolls away */
+  const R = { box: 1, start: 1, len: 1, over: 0 };
+  let trackH = 0;
+  function measure() {
+    if (el.classList.contains("lt-flat")) return;
+    const V = window.innerHeight;
+    R.box = boxSpan();
+    R.start = READ_AT * R.box;
+    R.over = Math.max(0, body.offsetHeight - sheet.clientHeight);
+    R.len = Math.max(R.over * READ_RATE, 0.3 * V);
+    const h = Math.round(stage.offsetHeight + R.start + R.len + 0.15 * V);
+    if (Math.abs(h - trackH) < 2) return;
+    trackH = h;
+    el.style.setProperty("--lt-h", `${h}px`);
+    window.ScrollTrigger?.refresh(); // track changed: later reveals need fresh positions
+  }
+  measure();
 
   // paint the canvases one per idle slice once the fonts are in, so the first
   // build near the screen doesn't stall a scroll drawing ~20 MB of paper and ink
@@ -699,9 +664,11 @@ export function mount(el) {
     S = null;
     setTimeout(() => { if (near && !S && !(S = build())) flat(); }, 1500);
   }
-  // no WebGL: fold the track away; the photo and his lines below still tell it
+  // no WebGL: fold the track away and leave his letter as a plain paper card
   function flat() {
     el.classList.add("lt-flat");
+    sheet.style.opacity = "";
+    body.style.transform = "";
     window.ScrollTrigger?.refresh(); // track collapsed
     nearIO.disconnect();
     farIO.disconnect();
@@ -720,7 +687,10 @@ export function mount(el) {
   farIO.observe(el);
 
   // the stage is 100svh, so a phone's URL bar never resizes it; page zoom does
-  new ResizeObserver(() => S?.resize()).observe(stage);
+  // (the letter's body too: its height changes when the handwriting face arrives)
+  const ro = new ResizeObserver(() => { S?.resize(); measure(); });
+  ro.observe(stage);
+  ro.observe(body);
 
   /* =========================================================
      build: one renderer + scene; returns { resize, dispose } or null
@@ -747,6 +717,7 @@ export function mount(el) {
     renderer.shadowMap.autoUpdate = false; // re-rendered only when something moves
 
     let alive = true, raf = 0, sized = false, first = true, sp = 0, lastP = -1, lastVis = "", dirty = true;
+    let lastLO = "", lastLY = "", lastLR = "";
     let last = performance.now() / 1000;
     const capOp = CAPS.map(() => "");
     const bag = [];
@@ -831,31 +802,17 @@ export function mount(el) {
     // single-sided panels: without this the open letter, facing the lamp, casts no shadow
     M.paperF.shadowSide = THREE.DoubleSide;
 
-    // his handwriting: ink texture + reveal bands, patched into the front of the paper
-    const inkU = {
-      uInk: { value: inkTex },
-      uReveal: { value: 0 },
-      uLine: { value: Array.from({ length: MAXL }, () => new THREE.Vector4()) },
-      uSpan: { value: Array.from({ length: MAXL }, () => new THREE.Vector2()) },
-      uCount: { value: 0 },
-    };
-    const setInk = (L) => {
-      for (let i = 0; i < MAXL; i++) {
-        inkU.uLine.value[i].set(...(L.lines[i] || [0, 0, 0, 0]));
-        inkU.uSpan.value[i].set(...(L.spans[i] || [0, 0]));
-      }
-      inkU.uCount.value = L.count;
-    };
-    setInk(inkE.out);
+    // his greeting: ink texture patched into the front of the paper
+    const inkU = { uInk: { value: inkTex }, uKx: { value: 1 } };
     M.paperF.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, inkU);
       sh.fragmentShader = sh.fragmentShader
-        .replace("void main() {", `${INK_DECL}\nvoid main() {`)
+        .replace("void main() {", "uniform sampler2D uInk;\nuniform float uKx;\nvoid main() {")
         .replace("#include <map_fragment>", `#include <map_fragment>\n${INK_FRAG}`);
     };
     fontsReady().then(() => {
       if (!alive) return;
-      if (reart(inkE, drawInk, HAND_FAMILY)) { inkTex.needsUpdate = true; setInk(inkE.out); dirty = true; } // was drawn in a fallback face
+      if (reart(inkE, drawInk, HAND_FAMILY)) { inkTex.needsUpdate = true; dirty = true; } // was drawn in a fallback face
       if (reart(cardE, drawCard, SERIF_FAMILY)) { cardTex.needsUpdate = true; dirty = true; }
     });
 
@@ -1016,8 +973,8 @@ export function mount(el) {
     /* =========================================================
        layout: camera beats + the letter's final pose for this stage shape
        ========================================================= */
-    let curveC = null, curveT = null, keys = KEYS, caps = CAPS;
-    const Q_END = new THREE.Quaternion(), dummy = new THREE.Object3D();
+    let curveC = null, curveT = null, keys = KEYS, caps = CAPS, kx = 1;
+    const Q_END = new THREE.Quaternion(), Q_READ = new THREE.Quaternion(), dummy = new THREE.Object3D();
     function layout() {
       const W = stage.clientWidth, H = stage.clientHeight;
       if (!W || !H) return false;
@@ -1031,11 +988,15 @@ export function mount(el) {
       camera.updateProjectionMatrix();
       const vh1 = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), vw1 = vh1 * aspect;
       const fit = (w, h) => Math.max(h / vh1, w / vw1);
+      // the reading window (.lt-letter, sized in css): the paper takes its shape
+      // (kx) and the camera comes to where the paper fills it exactly
+      const ww = sheet.clientWidth, wh = sheet.clientHeight;
+      kx = ww && wh ? ww / wh / (LW / LH) : 1;
       const pos = [], tgt = [];
       for (const k of keys) {
-        if (k.letter) {
-          // portrait: 92% of the width (the last beat's 0.94 push-in then stops just short of the edges)
-          const d = fit(LW / (tall ? 0.92 : 0.8), LH / 0.84) * k.letter;
+        if (k.letter || k.read) {
+          // portrait: 92% of the width
+          const d = k.read && wh ? (LH * H) / (vh1 * wh) : fit(LW / (tall ? 0.92 : 0.8), LH / 0.84) * (k.letter || 0.94);
           tgt.push(LETTER_AT.clone());
           pos.push(LETTER_DIR.clone().multiplyScalar(d).add(LETTER_AT));
         } else {
@@ -1046,10 +1007,12 @@ export function mount(el) {
       }
       curveC = new THREE.CatmullRomCurve3(pos, false, "centripetal");
       curveT = new THREE.CatmullRomCurve3(tgt, false, "centripetal");
-      // the letter ends square to the reading camera, tipped back a touch
+      // the letter opens square to the camera, tipped back a touch; for reading
+      // it squares up exactly (both cameras sit on LETTER_DIR)
       dummy.position.copy(LETTER_AT);
       dummy.quaternion.identity();
       dummy.lookAt(pos[keys.findIndex((k) => k.letter)]);
+      Q_READ.copy(dummy.quaternion);
       dummy.rotateX(-0.05);
       dummy.rotateZ(0.015);
       Q_END.copy(dummy.quaternion);
@@ -1069,18 +1032,20 @@ export function mount(el) {
     }
 
     /* =========================================================
-       update: scroll progress -> lid, letter, ink, camera, light
+       update: box progress p (and rk, how far the camera has come in to
+       read) -> lid, letter, camera, light
        ========================================================= */
     const camPos = new THREE.Vector3(), camTgt = new THREE.Vector3(), ptrS = { x: 0, y: 0 };
-    function update(p, t, dt, vis) {
+    function update(p, rk, t, dt, vis) {
       const u = keyU(p);
       curveC.getPoint(u, camPos);
       curveT.getPoint(u, camTgt);
       const kp = Math.min(1, dt * 3);
       ptrS.x += (ptr.x - ptrS.x) * kp;
       ptrS.y += (ptr.y - ptrS.y) * kp;
-      camPos.x += ptrS.x * 0.12;
-      camPos.y += (t ? Math.sin(t * 0.5) * 0.015 : 0) - ptrS.y * 0.06; // a slow breath
+      const calm = 1 - rk; // settled to read: no parallax, no breath, so the real text sits exactly on the paper
+      camPos.x += ptrS.x * 0.12 * calm;
+      camPos.y += ((t ? Math.sin(t * 0.5) * 0.015 : 0) - ptrS.y * 0.06) * calm; // a slow breath
       camera.position.copy(camPos);
       camera.lookAt(camTgt);
 
@@ -1093,16 +1058,19 @@ export function mount(el) {
       const r = sstep(...TL.rise, p);
       bez(P_IN, P_MID, LETTER_AT, r, letter.position);
       const ls = S_IN + (1 - S_IN) * sstep(0.05, 0.6, r); // folded small in the white box, full size in the air
-      letter.scale.set(ls, ls, 1);
+      const sx = 1 + (kx - 1) * rk; // coming in to read, it takes the reading window's shape
+      letter.scale.set(ls * sx, ls, 1);
+      inkU.uKx.value = sx;
       letter.quaternion.slerpQuaternions(Q_IN, Q_END, sstep(0.08, 0.92, r));
       letter.rotateX(-Math.sin(Math.PI * r) * 0.35); // paper catching the air
-      const ut = sstep(...TL.top, p), ub = sstep(...TL.bot, p);
-      topHinge.rotation.x = Math.PI + (CREASE - Math.PI) * ut;
+      letter.quaternion.slerp(Q_READ, rk);
+      const ut = sstep(...TL.top, p), ub = sstep(...TL.bot, p), cr = CREASE * calm; // pressed flat to read
+      topHinge.rotation.x = Math.PI + (cr - Math.PI) * ut;
       topHinge.position.z = 2 * EPS * (1 - ut);
-      botHinge.rotation.x = -(Math.PI + (CREASE - Math.PI) * ub);
+      botHinge.rotation.x = -(Math.PI + (cr - Math.PI) * ub);
       botHinge.position.z = EPS * (1 - ub);
-      inkU.uReveal.value = clamp((p - TL.ink[0]) / (TL.ink[1] - TL.ink[0]));
-      M.paperF.emissiveIntensity = 0.16 * sstep(0.46, 0.62, p); // warms as it turns to us (never the ink)
+      // warms as it turns to us, then brightens towards the real-text paper (never the ink)
+      M.paperF.emissiveIntensity = 0.16 * sstep(0.46, 0.62, p) + 0.45 * rk;
 
       moteMat.uniforms.uTime.value = t;
       moteMat.uniforms.uOpacity.value = 0.2 + 0.3 * a + 0.5 * sstep(0.46, 0.7, p);
@@ -1124,17 +1092,23 @@ export function mount(el) {
       const r = el.getBoundingClientRect(), vh = window.innerHeight;
       if (r.bottom <= 0 || r.top >= vh) { first = true; return; } // off screen: draw nothing
       if (!sized && !layout()) return;                               // not laid out yet
-      const span = r.height - stage.offsetHeight;
-      const p = span > 0 ? clamp(-r.top / span) : 0;
-      sp = first || REDUCED ? p : sp + (p - sp) * (1 - Math.exp(-dt * 7));
+      const s = clamp(-r.top, 0, Math.max(0, r.height - stage.offsetHeight)); // px scrolled into the track
+      sp = first || REDUCED ? s : sp + (s - sp) * (1 - Math.exp(-dt * 7));
       first = false;
+      const p = Math.min(1, sp / R.box), rk = sstep(...TL.cam, p), rp = clamp((sp - R.start) / R.len);
       const vis = Math.min(sstep(0, 0.6, (vh - r.top) / vh), sstep(0.04, 0.7, r.bottom / vh));
       const vs = vis.toFixed(3);
       if (vs !== lastVis) { lastVis = vs; stage.style.setProperty("--lt-vis", vs); dirty = true; }
-      if (Math.abs(sp - lastP) > 1e-5) { lastP = sp; renderer.shadowMap.needsUpdate = true; dirty = true; }
+      if (Math.abs(p - lastP) > 1e-5) { lastP = p; renderer.shadowMap.needsUpdate = true; dirty = true; }
+      // his letter: fades in over the paper once the camera has come in, then his
+      // words move up through the window as the page scrolls (teleprompter)
+      const lo = (sstep(...TL.read, p) * vis).toFixed(3), ly = (-rp * R.over).toFixed(1), lr = rk.toFixed(3);
+      if (lo !== lastLO) { lastLO = lo; sheet.style.opacity = lo; }
+      if (ly !== lastLY) { lastLY = ly; body.style.transform = `translate3d(0, ${ly}px, 0)`; }
+      if (lr !== lastLR) { lastLR = lr; stage.style.setProperty("--lt-read", lr); } // lifts the vignette off the paper
       if (REDUCED && !dirty) return; // nothing moves on its own: redraw only when scroll changes the frame
       dirty = false;
-      update(sp, REDUCED ? 0 : t, dt, vis);
+      update(p, rk, REDUCED ? 0 : t, dt, vis);
       renderer.render(scene, camera);
     }
     layout();
@@ -1150,6 +1124,8 @@ export function mount(el) {
         cancelAnimationFrame(raf);
         cv.remove();
         stage.style.setProperty("--lt-vis", "0");
+        stage.style.setProperty("--lt-read", "0");
+        sheet.style.opacity = "0";
         capEls.forEach((c) => { c.style.opacity = "0"; });
         // compileAsync polls the programs until they link; tearing the renderer
         // down under it would throw, so free the GPU side once it has settled

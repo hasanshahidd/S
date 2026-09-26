@@ -790,6 +790,30 @@ export function mount(el) {
       runway(1, 1, -1),   // Manchester, landing
     ];
 
+    /* --- the real airports beside their runways (one module each, loaded on their own so a
+           failure never breaks the flight). Each is built in its runway's frame: +Z up, +Y
+           along the runway, +X away from it, with the runway centre at x = -0.45. --- */
+    const airports = [];
+    for (const [code, rw] of [["lhe", runways[0]], ["jed", runways[1]], ["man", runways[3]]]) {
+      import(`./us.airport.${code}.js`).then(({ buildAirport }) => {
+        if (!alive) return;
+        const api = buildAirport({ mobile: MQ.matches });
+        const g = new THREE.Group();
+        g.quaternion.copy(rw.quaternion);
+        g.position.copy(rw.position);
+        api.root.position.x += 0.45;
+        g.add(api.root);
+        const mats = [];
+        api.root.traverse((o) => {
+          const m = o.material;
+          (Array.isArray(m) ? m : m ? [m] : []).forEach((mm) => { mm.transparent = true; mats.push([mm, mm.opacity ?? 1]); });
+        });
+        scene.add(g);
+        keep({ dispose: () => api.dispose() });
+        airports.push({ g, api, mats });
+      }).catch((e) => console.warn(`flight: airport ${code} unavailable`, e));
+    }
+
     /* --- the trail: green behind the plane, dashed ahead --- */
     const tp = new Float32Array((N1 + N2 - 1) * 3), tv = new V3();
     let o = 0;
@@ -978,6 +1002,13 @@ export function mount(el) {
         m.visible = fade > 0.01;
         m.material.opacity = fade;
         m.material.color.setScalar(lerp(0.75, 1, day));
+      }
+      for (const ap of airports) {             // the airports fade with their runways
+        const fade = 1 - sstep(6, 10, camera.position.distanceTo(ap.g.position));
+        ap.g.visible = fade > 0.01;
+        if (!ap.g.visible) continue;
+        for (const [mm, o] of ap.mats) mm.opacity = o * fade;
+        ap.api.update?.(t || 0, 1 / 60);
       }
       starMat.opacity = night;
       stars.visible = night > 0.01;

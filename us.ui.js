@@ -1,4 +1,4 @@
-import { PHOTOS, LETTERS, LETTER_LINES, LETTER_FULL, REMEMBER, SONG, SONG_FALLBACK } from "./us.data.js";
+import { PHOTOS, LETTERS, REMEMBER, SONG, SONG_FALLBACK } from "./us.data.js";
 import { DAYS } from "./us.days.js";
 import { DAY_MS, midnight, dateOfDay, fmtDate, todayNumber } from "./us.today.js";
 import * as planeSound from "./us.planesound.js";
@@ -127,27 +127,8 @@ function tick() {
    wall clock (and the blinking colons) instead of drifting with setInterval */
 (function loop() { tick(); setTimeout(loop, 1005 - (Date.now() % 1000)); })();
 
-/* ---------- his whole letter, written out (each "~" is one of his red hearts) ---------- */
-{
-  const host = $("letterFull");
-  if (host) {
-    const para = (text, cls) => {
-      const p = document.createElement("p");
-      if (cls) p.className = cls;
-      text.split("~").forEach((part, i, all) => {
-        p.append(part);
-        if (i < all.length - 1) p.append(Object.assign(document.createElement("span"), { className: "heart", textContent: "♥︎", ariaHidden: "true" }));
-      });
-      return p;
-    };
-    host.replaceChildren(para(LETTER_FULL.greeting, "fl-greet"), ...LETTER_FULL.paragraphs.map((t) => para(t)), para(LETTER_FULL.closing, "fl-close"));
-  }
-}
-
-/* ---------- lines from his letter ---------- */
-$("letterLines")?.replaceChildren(
-  ...LETTER_LINES.map((t) => Object.assign(document.createElement("p"), { className: "reveal", textContent: t }))
-);
+/* The letter is now shown once, on the 3D paper as it opens from the box
+   (us.scene.letter.js reads LETTER_FULL directly). Nothing to wire here. */
 
 /* ---------- things to remember ---------- */
 $("rememberList").replaceChildren(
