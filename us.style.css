@@ -1667,3 +1667,12 @@ main { position: relative; z-index: 1; overflow-x: clip; }
 @media (max-width: 600px) {
   .hero .tag { flex-wrap: wrap; justify-content: center; row-gap: 4px; max-width: 100%; letter-spacing: 0.16em; }   /* the eyebrow wraps instead of running off a phone */
 }
+
+/* keep the box scene from reserving a long empty scroll, and drop its unreliable
+   on-paper text overlay (the full letter is read from #letterread below instead;
+   the no-WebGL .lt-flat fallback still shows its own copy) */
+.gift-track.lt-ready { height: 300vh !important; }
+@media (max-width: 820px) { .gift-track.lt-ready { height: 260vh !important; } }
+.gift-track:not(.lt-flat) .lt-letter { opacity: 0 !important; }
+.letterread { padding: 4vh 16px 2vh; display: flex; justify-content: center; }
+.letterread .fullletter { width: min(100%, 820px); }
