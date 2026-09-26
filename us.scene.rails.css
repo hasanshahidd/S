@@ -1,0 +1,8 @@
+/* =========================================================
+   Companions in the side margins (us.scene.rails.js)
+   One transparent fixed canvas above the globe and below main.
+   Desktop only: below 1200px it is hidden here and disposed in JS.
+   ========================================================= */
+.scene-rails { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; }
+@media (min-width: 1200px) { .scene-rails { display: block; } }
+.scene-rails canvas { display: block; width: 100%; height: 100%; opacity: .9; }

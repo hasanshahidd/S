@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Poppins:wght@200;300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="ticket.css" />
 </head>
 <body>
 
@@ -269,5 +270,16 @@
     }
   </script>
   <script type="module" src="main.js"></script>
+
+  <script src="songguard.js"></script>
+  <!-- the only addition: a boarding pass that pops in and opens the second page -->
+  <a class="us-ticket" href="us.html" aria-label="Open Under One Sky, a new page for the two of us">
+    <span class="ut-main">
+      <span class="ut-head">boarding pass &middot; for us</span>
+      <span class="ut-title">Under One Sky</span>
+      <span class="ut-route">LHE<i>&#9992;</i>MAN &middot; SV123</span>
+    </span>
+    <span class="ut-stub"><b>board</b></span>
+  </a>
 </body>
 </html>

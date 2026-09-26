@@ -1,0 +1,42 @@
+/* =========================================================
+   The only addition to the first page: a boarding pass that pops
+   in at the bottom and opens us.html. Fixed, so the original
+   layout is untouched. Palette previews the second page.
+   ========================================================= */
+.us-ticket {
+  position: fixed; left: 50%; bottom: 22px; z-index: 50;
+  display: flex; align-items: stretch;
+  width: min(420px, calc(100vw - 32px));
+  text-decoration: none; color: #eaf1ff;
+  background: linear-gradient(135deg, #0b1530, #060a17);
+  border: 1px solid rgba(70, 227, 210, 0.4); border-radius: 14px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 36px rgba(70, 227, 210, 0.18);
+  font-family: "Poppins", system-ui, sans-serif;
+  transform: translate(-50%, 160%);
+  animation: usTicketPop 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) 5s forwards;
+  transition: box-shadow 0.3s ease;
+}
+.us-ticket:hover { box-shadow: 0 20px 54px rgba(0, 0, 0, 0.55), 0 0 56px rgba(70, 227, 210, 0.32); }
+.us-ticket:focus-visible { outline: 2px solid #46e3d2; outline-offset: 4px; }
+@keyframes usTicketPop { to { transform: translate(-50%, 0); } }
+
+.us-ticket .ut-main { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 12px 16px; min-width: 0; }
+.us-ticket .ut-head { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #93a6cf; }
+.us-ticket .ut-title { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 22px; line-height: 1.1; color: #46e3d2; }
+.us-ticket .ut-route { font-size: 11px; letter-spacing: 0.14em; color: #eaf1ff; }
+.us-ticket .ut-route i { font-style: normal; color: #ffc47e; margin: 0 6px; }
+.us-ticket .ut-stub {
+  display: flex; align-items: center; padding: 0 16px;
+  border-left: 2px dashed rgba(147, 166, 207, 0.35);
+}
+.us-ticket .ut-stub b {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #060a17; background: #ffc47e; padding: 8px 12px; border-radius: 999px;
+  animation: usTicketGlow 2.4s ease-in-out 6s infinite;
+}
+@keyframes usTicketGlow { 50% { box-shadow: 0 0 18px rgba(255, 196, 126, 0.75); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .us-ticket { animation: none; transform: translate(-50%, 0); }
+  .us-ticket .ut-stub b { animation: none; }
+}

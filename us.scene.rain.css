@@ -1,0 +1,35 @@
+/* =========================================================
+   Rain on the glass (us.scene.rain.js)
+   A WebGL canvas laid exactly over the rainy-night photo. It draws only
+   the drops and a breath of mist; the clear glass is transparent, so the
+   faces and trails are the real sharp <img>. If WebGL never starts, the
+   plain photo (and the CSS droplets in us.style.css) are what you see.
+   ========================================================= */
+.photo .scene-rain {
+  position: absolute;
+  inset: 0;                 /* the figure's padding box = the img's box */
+  z-index: 1;               /* above the img and its CSS ::after droplets */
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 13px;      /* = .photo img, inside the 1px frame border */
+  pointer-events: none;     /* clicks still reach the figure -> lightbox */
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.photo .scene-rain.is-on { opacity: 1; }
+
+/* the canvas no longer hides the <img>: fade the tiled CSS droplets out
+   as the real rain fades in, so none sit over the faces */
+.stop[data-rain] .photo:has(.scene-rain.is-on)::after {
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo .scene-rain,
+  .stop[data-rain] .photo:has(.scene-rain.is-on)::after { transition: none; }
+}
+
+/* once the WebGL rain is running, stop the old CSS streaks behind the photo */
+.stop[data-rain] .photo:has(.scene-rain.is-on)::before { animation: none; opacity: 0; }

@@ -1,0 +1,106 @@
+/* =========================================================
+   The sky of opened notes (us.scene.stars.js), inside section.today.
+   Breaks out of the 900px column to ~1000px; the canvas is transparent
+   so the page's night (and the globe) shows through.
+   ========================================================= */
+
+.scene-stars {
+  position: relative;
+  height: clamp(280px, 48vh, 460px);
+  height: clamp(280px, 48svh, 460px);  /* svh: no jumps when a phone's address bar moves */
+  margin: 22px calc(50% - min(500px, 50vw - 16px)) 6px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.scene-stars.off { height: 0; margin: 0; } /* no WebGL: the strip below still lists every note */
+
+/* a soft night scrim so the opened stars never read as the globe's dots behind them;
+   painted under the canvas (the canvas is a later positioned sibling) */
+.scene-stars::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(62% 72% at 50% 50%, rgba(6, 10, 23, 0.55), rgba(6, 10, 23, 0.25) 60%, transparent 78%);
+  opacity: 0;
+  transition: opacity 1.2s var(--ease);
+}
+.scene-stars.live::before { opacity: 1; }
+
+.stars-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* "day 5 · 25 Sep" above the hovered star */
+.stars-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  padding: 6px 12px 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(6, 10, 23, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.9);
+  color: var(--ink);
+  font: 500 11px/1.2 var(--sans);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+}
+.stars-tip.on { opacity: 1; }
+.stars-tip b { color: var(--amber); font-weight: 600; }
+
+/* legend, shown once the sky is live */
+.stars-legend {
+  position: absolute;
+  right: 0;
+  bottom: 4px;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 20px;
+  color: var(--muted);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8); /* readable over the globe, like .unlock-label */
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease) 0.6s;
+}
+.scene-stars.live .stars-legend { opacity: 0.85; }
+.stars-legend span[hidden] { display: none; }
+.stars-legend i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  vertical-align: 1px;
+}
+.stars-legend .t { background: var(--amber); box-shadow: 0 0 8px rgba(255, 196, 126, 0.85); }
+.stars-legend .o { background: var(--teal); box-shadow: 0 0 6px rgba(70, 227, 210, 0.7); }
+.stars-legend .n { border: 1px solid rgba(147, 166, 207, 0.75); }
+
+@media (max-width: 820px) {
+  .scene-stars { margin-top: 16px; }
+  .stars-legend { gap: 6px 14px; font-size: 10px; letter-spacing: 0.12em; }
+  .stars-tip { font-size: 10px; padding: 5px 10px 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stars-tip, .stars-legend, .scene-stars::before { transition: none; }
+}

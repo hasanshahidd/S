@@ -1,0 +1,18 @@
+/* =========================================================
+   UNDER ONE SKY  -  the night drive (us.scene.drive.js)
+   Only the inside of .drive: its fallback night, the canvas, the feather
+   and the caption. The box itself is sized in us.style.css.
+   ========================================================= */
+
+.drive { position: relative; overflow: hidden; background: radial-gradient(60% 50% at 50% 42%, rgba(255,180,94,.16), transparent 70%), linear-gradient(#03050c, #0a1226 55%, #070a12); }
+.drive-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s var(--ease); pointer-events: none; }
+.drive.drive-ready .drive-canvas { opacity: 1; }
+.drive::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(3,5,12,.78), transparent 45%); z-index: 1; }
+.drive-cap { position: absolute; z-index: 2; left: clamp(20px, 4vw, 48px); right: clamp(20px, 4vw, 48px); bottom: clamp(20px, 5vh, 56px); margin: 0; max-width: 28ch; text-align: left; }
+.drive-cap .tag { margin-bottom: 14px; }
+.drive-cap em { display: block; font: italic 400 clamp(1.6rem, 1rem + 2vw, 2.75rem)/1.12 var(--serif); color: var(--ink); text-shadow: 0 2px 20px rgba(0,0,0,.85); }
+@media (min-width: 1200px) {
+  .drive { -webkit-mask-image: linear-gradient(transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(transparent, #000 7%, #000 93%, transparent); }
+  .drive-cap { left: calc((100% - min(1360px, 100% - 2 * clamp(16px, 4.5vw, 72px))) / 2); bottom: clamp(40px, 8vh, 80px); }
+}
+@media (prefers-reduced-motion: reduce) { .drive-canvas { transition: none; } }

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Under One Sky &middot; Lahore &#9992; Manchester</title>
+  <meta name="description" content="Lahore to Jeddah to Manchester. Different cities, same sky. A page for us." />
+  <link rel="icon" type="image/svg+xml" href="favicon-us.svg" />
+  <meta name="theme-color" content="#060a17" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="us.style.css" />
+  <link rel="stylesheet" href="us.scene.stars.css" />
+  <link rel="stylesheet" href="us.scene.rain.css" />
+  <link rel="stylesheet" href="us.scene.flight.css" />
+  <link rel="stylesheet" href="us.scene.letter.css" />
+  <link rel="stylesheet" href="us.scene.memories.css" />
+  <link rel="stylesheet" href="us.scene.rails.css" />
+  <link rel="stylesheet" href="us.scene.drive.css" />
+  <link rel="stylesheet" href="us.scene.splitflap.css" />
+</head>
+<body class="loading">
+
+  <!-- Preloader: a departures board. The "board" tap is the user gesture that lets the song play. -->
+  <div id="preloader">
+    <div id="prePlane" aria-hidden="true"></div>
+    <!-- a real departures display: every character on its own split-flap tile (us.ui.js setFlap) -->
+    <div class="pre-board fids" role="img" aria-label="Departures, 21 September 2026. SV739 from Lahore to Jeddah at 02:40, terminal M, boarding. Then SV123 from Jeddah to Manchester at 08:15, terminal 1, on time.">
+      <div class="fids-head">
+        <span class="fids-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.5 19h19v2h-19zM22.1 9.6c-.2-.8-1-1.3-1.8-1.1l-5.3 1.4L8.1 3.5l-1.9.5 4.1 7.2-5 1.3-2-1.6-1.4.4 1.8 3.2.8 1.3 1.6-.4 5.3-1.4 4.3-1.2 5.3-1.4c.8-.3 1.3-1.1 1.1-1.8z"/></svg>departures</span>
+        <span class="fids-date">21 Sep 2026</span>
+      </div>
+      <div class="fids-grid">
+        <div class="fids-cols"><span>time</span><span>flight</span><span>destination</span><span class="fids-term">term</span><span>status</span></div>
+        <div class="fids-row">
+          <span class="flap f-time" data-flap="02:40"></span>
+          <span class="flap f-flight" data-flap="SV739"></span>
+          <span class="fids-dest"><span class="flap" data-flap="JEDDAH" data-w="10"></span><small>from Lahore</small></span>
+          <span class="flap fids-term" data-flap="M"></span>
+          <span class="flap fids-status" id="preStatus" data-flap="PREPARING" data-w="9"></span>
+        </div>
+        <div class="fids-row">
+          <span class="flap f-time" data-flap="08:15"></span>
+          <span class="flap f-flight" data-flap="SV123"></span>
+          <span class="fids-dest"><span class="flap" data-flap="MANCHESTER" data-w="10"></span><small>from Jeddah</small></span>
+          <span class="flap fids-term" data-flap="1"></span>
+          <span class="flap fids-status is-ontime" data-flap="ON TIME" data-w="9"></span>
+        </div>
+      </div>
+      <div class="pre-bar"><div class="pre-fill" id="preFill"></div></div>
+    </div>
+    <button class="pre-board-btn" id="boardBtn" hidden>board &nbsp;&#9992;</button>
+    <button class="pre-sound" id="preSound" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>tap for sound</span></button>
+  </div>
+
+  <!-- three.js globe with the Jeddah -> Manchester arc, fixed behind everything -->
+  <div id="globe" aria-hidden="true"></div>
+  <!-- companion objects in the side margins (desktop only), themed by [data-rails] -->
+  <div id="rails" class="scene-rails" data-scene="rails" aria-hidden="true"></div>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="hero" data-globe="full" data-rails="planes" data-rails-density="0.4">
+      <div class="hero-inner">
+        <p class="tag reveal">for shayan &middot; <span style="white-space: nowrap">lahore &rarr; manchester</span> &middot; <span style="white-space: nowrap">21 &middot; 09 &middot; 2026</span></p>
+        <h1 class="title reveal">Under One <em>Sky</em></h1>
+        <p class="subtitle lead reveal">On the twenty-first of September you flew to a new life, and I watched every mile of it on a little green map. This page holds everything I couldn't fit into a goodbye. We're in different cities now, but the sky over us is the same.</p>
+        <a class="btn cta reveal" href="#journey">begin our story</a>
+      </div>
+      <div class="scroll-hint reveal" aria-hidden="true"><span>scroll</span><i></i></div>
+    </section>
+
+    <!-- TODAY: one note opens each day (day 1 = 21 Sep 2026, the day he left) -->
+    <section class="today" id="today" data-globe="dim" data-rails="postcards" data-rails-density="0.5">
+      <div class="wrap today-grid">
+        <header class="sec-head">
+          <div class="sec-title">
+            <p class="tag today-eyebrow reveal">a note for every day of your first year there</p>
+            <h2 class="h2 reveal">Today&rsquo;s note</h2>
+          </div>
+          <p class="lead reveal">A new note opens every midnight, your time. No skipping ahead, not even for me. We'll do this the same way you're doing everything over there: one day at a time.</p>
+        </header>
+
+        <div class="today-card card reveal" aria-live="polite">
+          <div class="today-head"><span class="today-day" id="todayDay">day &ndash;</span><span class="today-date" id="todayDate"></span></div>
+          <p class="today-text" id="todayText"></p>
+          <button class="btn today-back" id="todayBack" hidden>&larr; back to today's note</button>
+        </div>
+
+        <div class="today-side">
+          <div class="unlock card reveal" id="unlock" aria-live="off">
+            <p class="label unlock-label">note <b id="ucNext">&ndash;</b> opens in</p>
+            <div class="unlock-clock"><span><b id="ucH">--</b><small>hours</small></span><i>:</i><span><b id="ucM">--</b><small>minutes</small></span><i>:</i><span><b id="ucS">--</b><small>seconds</small></span></div>
+          </div>
+          <div class="scene scene-stars" data-scene="stars" aria-hidden="true"></div>
+        </div>
+
+        <div class="today-opened">
+          <p class="label opened-label reveal">every note you've opened so far &middot; tap a day to read it again</p>
+          <div class="opened" id="openedList" role="group" aria-label="notes opened so far"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE JOURNEY: one flight path down the left edge, five dated stops along it -->
+    <section class="journey" id="journey" data-globe="dim">
+      <div class="route" aria-hidden="true"><div class="route-fill"></div></div>
+      <header class="wrap sec-head journey-head">
+        <div class="sec-title">
+          <p class="tag reveal">our story &middot; five stops</p>
+          <h2 class="h2 reveal">Before you flew</h2>
+        </div>
+        <p class="lead reveal">A rainy night, the car in the dark, a watch on your wrist, your face, and a tag with my name on it. Five moments I keep going back to.</p>
+      </header>
+
+      <!-- 1. the rainy night  (1200x1600, 3:4 portrait) -->
+      <article class="stop stop--rain" data-side="left" data-rain data-rails="rain">
+        <figure class="photo reveal" data-photo="together" style="aspect-ratio: 1200 / 1600">
+          <img src="images/us-together.webp" width="1200" height="1600" loading="lazy" decoding="async" alt="The two of us, our first mirror selfie together, both in black" />
+          <canvas class="scene-rain" data-scene="rain" aria-hidden="true"></canvas>
+        </figure>
+        <div class="stop-body card reveal">
+          <p class="tag">a rainy night &middot; the first photo of us</p>
+          <h3 class="h3">The two of us</h3>
+          <p>It was raining, and we were together. Somewhere in that night, in front of a mirror, both in black and both grinning, we took our first photo together.</p>
+          <p>It isn't a perfect picture. It doesn't need to be. It's proof of two people being completely happy in the same place at the same time, and I look at it more than I'll ever admit.</p>
+          <p>We made memories that night that I still carry everywhere. Now every time it rains, I'm back in that mirror with you.</p>
+          <blockquote class="pull">The first photo of us, and still the one I go back to.</blockquote>
+        </div>
+      </article>
+
+      <!-- 2. 19 September, with the night-drive scene  (899x1599, 9:16 portrait) -->
+      <article class="stop stop--drive" data-side="right" data-rails="road">
+        <div class="drive reveal" data-scene="drive" role="img" aria-label="Streetlights passing overhead at night, seen through a car windscreen">
+          <p class="drive-cap"><em>Somewhere in the dark, your hand in mine.</em></p>
+        </div>
+        <figure class="photo reveal" data-photo="hands" style="aspect-ratio: 899 / 1599">
+          <img src="images/us-hands.webp" width="899" height="1599" loading="lazy" decoding="async" alt="Our hands held together in the car at night" />
+        </figure>
+        <div class="stop-body card reveal">
+          <p class="tag">19 &middot; 09 &middot; 2026 &middot; two nights before you flew</p>
+          <h3 class="h3">The nineteenth of September</h3>
+          <p>Two nights before you flew. The car, the dark, and your hand in mine.</p>
+          <p>At the time it just felt like holding on. Looking back, I understand what it was: one of the last nights I could reach across and find you right there, close enough to touch.</p>
+          <p>That's why one of the counters at the end of this page starts from the nineteenth. I wanted to measure the distance from a night I was holding your hand, not only from the morning I had to let it go.</p>
+          <blockquote class="pull">Your hand in mine, in the car, in the dark. That was enough.</blockquote>
+        </div>
+      </article>
+
+      <!-- 3. the gift I gave you  (900x1600, 9:16 portrait) -->
+      <article class="stop stop--gift" data-side="left" data-rails="watch">
+        <figure class="photo reveal" data-photo="gift" style="aspect-ratio: 900 / 1600">
+          <img src="images/him-gift.webp" width="900" height="1600" loading="lazy" decoding="async" alt="His mirror selfie, wearing the watch and chain I gave him" />
+        </figure>
+        <div class="stop-body card reveal">
+          <p class="tag">the gift &middot; a watch and a thin silver chain</p>
+          <h3 class="h3">Something of mine, on your wrist</h3>
+          <p>I gave you a watch and a thin silver chain. Nothing grand. I just wanted you to have something of mine you could actually touch, in a place I couldn't follow.</p>
+          <p>And you wear them, both of them. I can't really explain what that does to me. Knowing they're on your wrist in Manchester right now is one of the quiet things that gets me through a day.</p>
+          <p>Whatever time that watch shows over there, a few hours behind mine, it's still counting from me.</p>
+          <blockquote class="pull">Every time you check the time over there, that's me.</blockquote>
+        </div>
+        <figure class="model reveal"><canvas class="mini" data-model="watch"></canvas><figcaption class="mini-label">still keeping our time</figcaption></figure>
+      </article>
+
+      <!-- 4. you  (900x1600, 9:16 portrait) -->
+      <article class="stop stop--face" data-side="right" data-rails="road" data-rails-density="0.6">
+        <figure class="photo reveal" data-photo="him" style="aspect-ratio: 900 / 1600">
+          <img src="images/him-car.webp" width="900" height="1600" loading="lazy" decoding="async" alt="His selfie in the car, glasses on, half a smile" />
+        </figure>
+        <div class="stop-body stop-body--open reveal">
+          <p class="tag">you &middot; glasses on</p>
+          <h3 class="h3">This face</h3>
+          <blockquote class="pull pull--lead">The face I picture every time your name lights up my phone.</blockquote>
+          <p>Glasses on, half a smile, sitting in the car. This is the face I'll be waiting to see again.</p>
+          <p>People over there are going to meet you and think they're meeting someone new. They'll really be meeting the person who wrote to me &ldquo;I will come&hellip; no matter what&rdquo; and meant every word.</p>
+          <p>Look after that face for me. Wear the glasses, get some sleep, and let it smile properly when something good happens.</p>
+        </div>
+      </article>
+
+      <!-- 5. the airport: split-flap board, then photo | body | suitcase  (1200x1600, 3:4 portrait) -->
+      <article class="stop stop--airport" data-side="left" data-rails="luggage">
+        <div class="board reveal" data-scene="splitflap">
+          <ul class="board-sr">
+            <li>SV739 &middot; Lahore &rarr; Jeddah &middot; 02:40 &middot; boarding</li>
+            <li>SV123 &middot; Jeddah &rarr; Manchester &middot; 08:15 &middot; on time</li>
+          </ul>
+        </div>
+        <figure class="photo reveal" data-photo="bag" style="aspect-ratio: 1200 / 1600">
+          <img src="images/bag-direwolf.webp" width="1200" height="1600" loading="lazy" decoding="async" alt="His suitcase at the airport with a neck pillow and a tag reading DIRE WOLF, my nickname" />
+        </figure>
+        <div class="stop-body card reveal">
+          <p class="tag">21 &middot; 09 &middot; 2026 &middot; LHE 02:40 &middot; terminal M</p>
+          <h3 class="h3">You took my name with you</h3>
+          <p>A dark grey suitcase, a grey neck pillow, and a tag in marker that reads <b>DIRE WOLF</b>. My nickname. Out of everything that could have been on that bag, it was me.</p>
+          <p>So when they called SV739 to board at twenty to two in the morning, I was already going with you, through every gate, all the way to Manchester.</p>
+          <p>Lahore let you go at 02:40. I didn't. Part of me is still riding on that tag.</p>
+          <blockquote class="pull">I couldn't board with you, so my name did.</blockquote>
+        </div>
+        <figure class="model reveal"><canvas class="mini" data-model="suitcase"></canvas><figcaption class="mini-label">DIRE WOLF, carried all the way</figcaption></figure>
+      </article>
+    </section>
+
+    <!-- IN THE AIR: a scroll-driven 3D flight, LHE -> JED -> MAN -->
+    <section class="flight" id="flight" data-globe="dim" data-rails="planes">
+      <header class="wrap sec-head flight-intro" data-globe="route">
+        <div class="sec-title">
+          <p class="tag reveal">in the air &middot; 21 &middot; 09 &middot; 2026</p>
+          <h2 class="h2 reveal">Lahore &rarr; Jeddah &rarr; Manchester</h2>
+        </div>
+        <p class="lead reveal">Two flights, one layover in Jeddah, fourteen hours and fifteen minutes door to door. You spent them in the air. I spent them in Lahore, refreshing a tracker and reading every update you sent. Scroll, and let's fly it once more, together this time.</p>
+      </header>
+
+      <div class="flight-track" data-scene="flight" data-globe="off" data-rails="none"><div class="flight-stage"></div></div>
+
+      <!-- the tracker screenshot (903x624, the only LANDSCAPE image) -->
+      <article id="tracker" class="stop wrap" data-layout="wide">
+        <div class="stop-body card reveal">
+          <p class="tag">in the air &middot; SV739 &rarr; SV123 &middot; 21 &middot; 09 &middot; 2026</p>
+          <h3 class="h3">Somewhere over France</h3>
+          <p>SV739 took you to Jeddah. SV123 took you the rest of the way. Eleven hours and forty-five minutes in the air, and I spent every one of them watching a little green plane on a map.</p>
+          <p>Every update you sent made the screen feel less far away. Every time that plane crept further across France towards Manchester, I got a little closer to breathing again.</p>
+          <p>12:55 in Manchester, 16:55 in Lahore. You landed. Alhamdulillah. I think I breathed properly for the first time that day.</p>
+          <blockquote class="pull">A little green plane over France, and all of my heart on board.</blockquote>
+        </div>
+        <figure class="photo reveal" data-photo="flight" style="aspect-ratio: 903 / 624">
+          <img src="images/flight-track.webp" width="903" height="624" loading="lazy" decoding="async" alt="Flight tracker: SV123 over Europe, Jeddah to Manchester" />
+        </figure>
+      </article>
+
+      <!-- boarding pass + the two real passes -->
+      <div class="wrap pass-row">
+        <div class="pass reveal" role="group" aria-label="Boarding pass, Lahore to Jeddah to Manchester, flights SV739 and SV123">
+          <div class="pass-main">
+            <div class="pass-head"><span>boarding pass</span><span>SV739 &middot; SV123</span></div>
+            <div class="pass-route">
+              <div><b>LHE</b><small>Lahore &middot; 02:40</small></div>
+              <div class="pass-plane"><canvas class="mini" data-model="plane"></canvas><small class="pass-via">via Jeddah &middot; 05:45 / 08:15</small></div>
+              <div><b>MAN</b><small>Manchester &middot; 12:55</small></div>
+            </div>
+            <div class="pass-grid">
+              <div><small>passenger</small><span>Shayan</span></div>
+              <div><small>date</small><span>21 Sep 2026</span></div>
+              <div><small>time in the air</small><span>11 h 45 m</span></div>
+              <div><small>seat</small><span>next to me, next time</span></div>
+            </div>
+          </div>
+          <div class="pass-stub">
+            <small>destination</small>
+            <b>a new life</b>
+            <div class="pass-barcode" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="passes">
+          <figure class="photo reveal" data-photo="passLhe" style="aspect-ratio: 1200 / 1600">
+            <img src="images/pass-lhe-jed.webp" width="1200" height="1600" loading="lazy" decoding="async"
+                 alt="Boarding pass SV739, Lahore 02:40 to Jeddah 05:45, 21 September (booking codes blurred)" />
+          </figure>
+          <figure class="photo reveal" data-photo="passMan" style="aspect-ratio: 900 / 1600">
+            <img src="images/pass-jed-man.webp" width="900" height="1600" loading="lazy" decoding="async"
+                 alt="Boarding pass SV123, Jeddah 08:15 to Manchester 12:55, 21 September (booking codes blurred)" />
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT YOU LEFT ME: the letter and the gift box -->
+    <section class="gift" id="gift" data-globe="dim" data-rails="envelopes">
+      <header class="wrap sec-head gift-head">
+        <div class="sec-title">
+          <p class="tag reveal">before you left</p>
+          <h2 class="h2 reveal">What you left me</h2>
+        </div>
+        <p class="lead reveal">A black box that says it's loved across 50+ countries around the globe. None of them love it like I do. Inside, a Sveston watch with a silver case and a black dial. A fine chain with a small round peach stone. A little card with my name on it. And a letter in your handwriting, red hearts all over it. I read it and cried. I have never felt so loved.</p>
+      </header>
+
+      <div class="gift-track" data-scene="letter" data-globe="off" data-rails="none"><div class="gift-stage"></div></div>
+
+      <div class="wrap gift-body">
+        <figure class="photo reveal" data-photo="letter" style="aspect-ratio: 1200 / 1600">
+          <img src="images/letter-gift.webp" width="1200" height="1600" loading="lazy" decoding="async" alt="His handwritten letter with red hearts beside the gift box: a watch, a bracelet and a card with my name" />
+        </figure>
+        <div class="letter-lines paper reveal">
+          <p class="label letter-lines-label">from your letter</p>
+          <p class="letter-lines-sub">Only the lines the photo shows. The rest stays between us.</p>
+          <div id="letterLines"></div>
+        </div>
+        <div class="gift-inventory card reveal">
+          <p class="label">inside the black box</p>
+          <ul>
+            <li><b>A Sveston watch</b><span>silver case &middot; black dial &middot; black leather strap</span></li>
+            <li><b>A fine chain bracelet</b><span>one small round peach stone</span></li>
+            <li><b>A small card</b><span>with my name on it</span></li>
+            <li><b>A letter in your handwriting</b><span>red hearts all over it</span></li>
+          </ul>
+          <p class="gift-box-note">on the box: &ldquo;Loved Across 50+ Countries Around the Globe&rdquo;</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY LETTER TO YOU -->
+    <section class="myletter" id="letter" data-globe="dim" data-rails="envelopes">
+      <div class="wrap myletter-grid">
+        <header class="myletter-aside">
+          <p class="tag reveal">from lahore, with everything</p>
+          <h2 class="h2 reveal" id="myletterTitle">My letter to you</h2>
+          <p class="lead reveal">Written down, so it's here whenever you need it.</p>
+        </header>
+        <article class="myletter-paper paper reveal" aria-labelledby="myletterTitle">
+          <span class="postmark" aria-hidden="true">LHE &rarr; MAN</span>
+          <p class="myletter-salute">Shayan,</p>
+          <p>You wrote that you can't even say it in words. I understand that now. I'm going to try anyway, because you deserve to have it written down somewhere you can always come back to.</p>
+          <p>I still go back to that rainy night. The mirror, the two of us in black, both grinning. I didn't know then that it would become the photo I'd look at most. And the nineteenth of September, in the car in the dark, your hand in mine, two nights before you flew. I think part of me knew even then that I was holding something I'd have to let go of for a while. Not lose. Let go of, for a while. There's a difference, and I hold on to it every day.</p>
+          <p>Then came the black box. The watch with its silver case and black dial. The fine chain with the little peach stone. The card with my name on it. And your letter, covered in red hearts. You wrote that I'm an angel for you. You wrote that if I ever need you for anything, you will come, no matter what. You wrote that you're going to miss me so much I can't even imagine. I read it and I cried, and I'm not embarrassed to say so. I have never felt so loved by anyone.</p>
+          <p>On the twenty-first I watched you go, one flight after another: SV739 to Jeddah, then SV123 over France, a little green plane on my screen, and your updates keeping me company the whole way. When you landed in Manchester at 12:55, I said Alhamdulillah and finally breathed.</p>
+          <p>So here is what I need you to know.</p>
+          <p>I am so proud of you. It takes real courage to pack a dark grey suitcase and start a life somewhere new. You carried my name on that tag. I carry yours too: in my head, in my day, in every dua I make.</p>
+          <p>Wear the watch. Keep the chain on. On the days Manchester feels too big or too grey, look at your wrist and remember there is someone in Lahore, a few hours ahead of you, always the first to reach tomorrow and saving you a place in it.</p>
+          <p>Eat properly. Sleep. Call me when you can't. Tell me the small things, especially the small things. And if something ever gets too heavy, give some of it to me. That's what I'm here for.</p>
+          <p>May Allah keep you safe, make this new life easy for you, and bring us back into the same room, whenever He writes it. Until then, I'll be here, under the same sky, looking up.</p>
+          <p class="myletter-close">Always yours, and always loving you back,</p>
+          <p class="myletter-sign">DIRE WOLF <span aria-hidden="true">&#x2665;&#xFE0E;</span></p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ALL OF IT: a 3D fly-through of every photo -->
+    <section class="memories" id="memories" data-globe="dim" data-rails="none">
+      <header class="wrap sec-head memories-head">
+        <div class="sec-title">
+          <p class="tag reveal">nine photos &middot; one sky</p>
+          <h2 class="h2 reveal">All of it, under one sky</h2>
+        </div>
+        <p class="lead reveal">Every photo on this page, floating in the same night: the rain, the car, the watch, your face, the tag, the little green plane. There aren't many yet. InshaAllah there will be many more, and I'll want every single one.</p>
+      </header>
+      <div class="memories-track" data-scene="memories" data-globe="off" data-rails="none"><div class="memories-stage"></div></div>
+    </section>
+
+    <!-- REMEMBER: short encouragements (filled from REMEMBER in us.data.js) -->
+    <section class="remember" id="remember" data-globe="dim" data-rails="rain" data-rails-density="0.6">
+      <div class="wrap">
+        <header class="sec-head">
+          <div class="sec-title">
+            <p class="tag reveal">for the days you forget</p>
+            <h2 class="h2 remember-title reveal">Things to remember over there</h2>
+          </div>
+          <p class="lead reveal">Some of these will slip your mind in a new place. That happens to everyone. So I wrote them down, and they'll be here whenever you need them.</p>
+        </header>
+        <ul class="remember-list card" id="rememberList"></ul>
+      </div>
+    </section>
+
+    <!-- NOTES: openable, one for each kind of day -->
+    <section class="notes" id="notes" data-globe="dim" data-rails="postcards">
+      <div class="wrap">
+        <header class="sec-head">
+          <div class="sec-title">
+            <p class="tag reveal">eight envelopes</p>
+            <h2 class="h2 notes-title reveal">Notes for the distance</h2>
+          </div>
+          <p class="lead notes-sub reveal">Eight envelopes for eight kinds of days. Open whichever one today needs, as often as you need it. They're not going anywhere, and neither am I.</p>
+        </header>
+        <div class="postcards">
+          <button class="postcard card reveal" data-letter="0"><span class="pc-stamp" aria-hidden="true">&#9992;</span><span class="pc-no">01</span><span class="pc-label">when the days are long there</span><span class="pc-preview">For the grey days that just go on and on.</span><span class="pc-open">open</span></button>
+          <button class="postcard card reveal" data-letter="1"><span class="pc-stamp" aria-hidden="true">&#9992;</span><span class="pc-no">02</span><span class="pc-label">when you miss home</span><span class="pc-preview">Missing home means you had something worth missing.</span><span class="pc-open">open</span></button>
+          <button class="postcard card reveal" data-letter="2"><span class="pc-stamp" aria-hidden="true">&#9992;</span><span class="pc-no">03</span><span class="pc-label">when you doubt the move</span><span class="pc-preview">I watched that little plane cross Europe, and all I felt was proud.</span><span class="pc-open">open</span></button>
+          <button class="postcard card reveal" data-letter="3"><span class="pc-stamp" aria-hidden="true">&#9992;</span><span class="pc-no">04</span><span class="pc-label">when you need to hear it</span><span class="pc-preview">The distance is real. So is this.</span><span class="pc-open">open</span></button>
+          <button class="postcard card reveal" data-letter="4"><span class="pc-stamp" aria-hidden="true">&#9992;</span><span class="pc-no">05</span><span class="pc-label">when it rains in Manchester</span><span class="pc-preview">Every drop over there is a little reminder from here.</span><span class="pc-open">open</span></button>
+          <button class="postcard card reveal" data-letter="5"><span class="pc-stamp" aria-hidden="true">&#9992;</span><span class="pc-no">06</span><span class="pc-label">when you can't sleep</span><span class="pc-preview">Different time zone, same restless head.</span><span class="pc-open">open</span></button>
+          <button class="postcard card reveal" data-letter="6"><span class="pc-stamp" aria-hidden="true">&#9992;</span><span class="pc-no">07</span><span class="pc-label">when something good happens</span><span class="pc-preview">Tell me. Even the small stuff.</span><span class="pc-open">open</span></button>
+          <button class="postcard card reveal" data-letter="7"><span class="pc-stamp" aria-hidden="true">&#9992;</span><span class="pc-no">08</span><span class="pc-label">when you want to give up</span><span class="pc-preview">Hold on. Not forever, just for today.</span><span class="pc-open">open</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLOSING -->
+    <section class="closing" id="closing" data-globe="route" data-rails="moons">
+      <div class="wrap closing-inner">
+        <header class="closing-head">
+          <p class="tag reveal">you're in Manchester now</p>
+          <h2 class="closing-title reveal">Different cities.<br />Same <em>sky</em>.</h2>
+          <p class="closing-line lead reveal">Different time zones, different weather, different everything. My night starts a few hours before yours, so I'll always be the first to look up. Look up too, when you get there. It's the same sky, and I'll have left a prayer for you in it.</p>
+        </header>
+
+        <div class="clocks reveal">
+          <div class="clock card"><small>Lahore</small><b id="clkLhe">--:--:--</b><span id="clkLheD"></span></div>
+          <figure class="model model--compass"><canvas class="mini" data-model="compass"></canvas><figcaption class="mini-label">always pointing to you</figcaption></figure>
+          <div class="clock card"><small>Manchester</small><b id="clkMan">--:--:--</b><span id="clkManD"></span></div>
+        </div>
+
+        <div class="since reveal">
+          <p class="label since-label">since you took off from Lahore</p>
+          <div class="since-clock"><span><b id="sfD">0</b><small>days</small></span><span><b id="sfH">00</b><small>hours</small></span><span><b id="sfM">00</b><small>minutes</small></span><span><b id="sfS">00</b><small>seconds</small></span></div>
+        </div>
+
+        <p class="since-met reveal"><b id="sinceMet">&ndash;</b> days since the nineteenth of September</p>
+        <p class="signature reveal">yours, under the same sky <span class="sig-name">DIRE WOLF</span></p>
+        <a class="btn back-link reveal" href="index.html">&larr; back to the first page</a>
+        <p class="credits">Night Earth imagery: NASA, via three.js. Map: Natural Earth. Song: Ed Sheeran, &ldquo;Photograph&rdquo;. The planes are built in code, in the classic Saudi Arabian livery, as a tribute to his flights.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Song + toggle -->
+  <audio id="song" loop preload="auto"></audio>
+  <button id="soundBtn" class="sound-btn" aria-label="play or pause the music"><span class="eq"><i></i><i></i><i></i></span></button>
+
+  <!-- Note modal -->
+  <div class="note-modal" id="noteModal" hidden>
+    <div class="note-backdrop"></div>
+    <div class="note-paper paper" role="dialog" aria-modal="true" aria-labelledby="noteTitle">
+      <button class="note-close btn btn--icon" id="noteClose" aria-label="close">&times;</button>
+      <span class="note-postmark postmark">LHE &rarr; MAN</span>
+      <h3 class="note-title" id="noteTitle"></h3>
+      <div class="note-body" id="noteBody"></div>
+      <p class="note-sign">yours, always &middot; DIRE WOLF</p>
+    </div>
+  </div>
+
+  <!-- Photo lightbox (shows the photo at its true ratio) -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo at full size. Press Escape or Enter to close." tabindex="-1" hidden>
+    <img id="lightboxImg" alt="" />
+  </div>
+
+  <script src="songguard.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="us.ui.js"></script>
+</body>
+</html>
