@@ -1,4 +1,4 @@
-import { PHOTOS, LETTERS, LETTER_FULL, REMEMBER, SONG, SONG_FALLBACK } from "./us.data.js";
+import { PHOTOS, LETTERS, REMEMBER, SONG, SONG_FALLBACK } from "./us.data.js";
 import { DAYS } from "./us.days.js";
 import { DAY_MS, midnight, dateOfDay, fmtDate, todayNumber } from "./us.today.js";
 import * as planeSound from "./us.planesound.js";
@@ -127,27 +127,7 @@ function tick() {
    wall clock (and the blinking colons) instead of drifting with setInterval */
 (function loop() { tick(); setTimeout(loop, 1005 - (Date.now() % 1000)); })();
 
-/* his whole letter, plain readable text in the section after the 3D box (the box
-   scene stays untouched). "~" = one of his little red hearts. */
-{
-  const host = $("letterFull");
-  if (host) {
-    const para = (text, cls) => {
-      const el = document.createElement("p");
-      if (cls) el.className = cls;
-      text.split("~").forEach((part, i, all) => {
-        el.append(part);
-        if (i < all.length - 1) {
-          const h = Object.assign(document.createElement("span"), { className: "heart", textContent: "♥︎" });
-          h.setAttribute("aria-hidden", "true");
-          el.append(h);
-        }
-      });
-      return el;
-    };
-    host.replaceChildren(para(LETTER_FULL.greeting, "fl-greet"), ...LETTER_FULL.paragraphs.map((t) => para(t)), para(LETTER_FULL.closing, "fl-close"));
-  }
-}
+/* The full letter is drawn on the 3D paper by us.scene.letter.js (LETTER_FULL). */
 
 /* ---------- things to remember ---------- */
 $("rememberList").replaceChildren(
@@ -160,15 +140,22 @@ $("rememberList").replaceChildren(
    ========================================================= */
 const song = $("song");
 const soundBtn = $("soundBtn");
+const SONG_START = 78; // begin at 1:18, and loop back to there (not 0) at the end
 song.volume = 0.95;
+song.loop = false;     // we loop by hand so it returns to SONG_START, not the very start
 song.addEventListener("error", () => {
   if (!song.src.endsWith(SONG_FALLBACK)) song.src = SONG_FALLBACK;
 }, { once: true });
+const seekStart = () => { try { if (song.currentTime < SONG_START - 0.5) song.currentTime = SONG_START; } catch (e) {} };
+song.addEventListener("loadedmetadata", seekStart);
+song.addEventListener("ended", () => { seekStart(); playSong(); });   // loop back to 1:18
 song.src = SONG;
 
 /* Resolves true/false and swallows the rejection (autoplay block or an
-   AbortError from a pause racing a pending play). */
+   AbortError from a pause racing a pending play). Starts at 1:18 on a fresh
+   play, and keeps its place when resumed after a pause. */
 function playSong() {
+  if (song.currentTime < 1) seekStart();
   return song.play().then(
     () => { soundBtn.classList.add("playing"); return true; },
     () => { soundBtn.classList.remove("playing"); return false; }
