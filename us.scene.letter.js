@@ -630,9 +630,12 @@ export function mount(el) {
     if (el.classList.contains("lt-flat")) return;
     const V = window.innerHeight;
     R.box = boxSpan();
-    R.start = READ_AT * R.box;
-    R.over = Math.max(0, body.offsetHeight - sheet.clientHeight);
-    R.len = Math.max(R.over * READ_RATE, 0.3 * V);
+    /* The 3D scene is only the box opening now; the full letter is read from a
+       plain paper card that follows in the page flow (reliable everywhere), so
+       no long teleprompter track and no on-paper overlay. */
+    R.start = R.box;
+    R.over = 0;
+    R.len = 0.3 * V;
     const h = Math.round(stage.offsetHeight + R.start + R.len + 0.15 * V);
     if (Math.abs(h - trackH) < 2) return;
     trackH = h;
@@ -1102,7 +1105,7 @@ export function mount(el) {
       if (Math.abs(p - lastP) > 1e-5) { lastP = p; renderer.shadowMap.needsUpdate = true; dirty = true; }
       // his letter: fades in over the paper once the camera has come in, then his
       // words move up through the window as the page scrolls (teleprompter)
-      const lo = (sstep(...TL.read, p) * vis).toFixed(3), ly = (-rp * R.over).toFixed(1), lr = rk.toFixed(3);
+      const lo = "0", ly = "0.0", lr = rk.toFixed(3);   // on-paper letter overlay off: the readable card follows in flow
       if (lo !== lastLO) { lastLO = lo; sheet.style.opacity = lo; }
       if (ly !== lastLY) { lastLY = ly; body.style.transform = `translate3d(0, ${ly}px, 0)`; }
       if (lr !== lastLR) { lastLR = lr; stage.style.setProperty("--lt-read", lr); } // lifts the vignette off the paper
