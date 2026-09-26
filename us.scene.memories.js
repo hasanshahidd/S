@@ -187,7 +187,7 @@ function loadImage(src) {
       const img = new Image();
       img.decoding = "async";
       img.onload = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(() => res(img));
-      img.onerror = () => res(null); // procedural stand-in instead
+      img.onerror = () => { IMAGES.delete(src); res(null); }; // stand-in for now; retried on the next build, never cached as failed
       img.src = src;
     }));
   }
