@@ -1,42 +1,54 @@
 /* =========================================================
-   The only addition to the first page: a boarding pass that pops
-   in at the bottom and opens us.html. Fixed, so the original
-   layout is untouched. Palette previews the second page.
+   The only addition to the first page: a small boarding pass that pops
+   into the bottom-left corner and opens us.html. Fixed and compact, so
+   it never sits over the hero (the sound button keeps the right side).
+   Palette previews the second page.
    ========================================================= */
 .us-ticket {
-  position: fixed; left: 50%; bottom: 22px; z-index: 50;
+  position: fixed; left: 18px; bottom: 18px; z-index: 50;
   display: flex; align-items: stretch;
-  width: min(420px, calc(100vw - 32px));
+  max-width: calc(100vw - 36px);
   text-decoration: none; color: #eaf1ff;
-  background: linear-gradient(135deg, #0b1530, #060a17);
-  border: 1px solid rgba(70, 227, 210, 0.4); border-radius: 14px;
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 36px rgba(70, 227, 210, 0.18);
+  background: linear-gradient(135deg, rgba(11, 21, 48, 0.94), rgba(6, 10, 23, 0.94));
+  border: 1px solid rgba(70, 227, 210, 0.38); border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5), 0 0 26px rgba(70, 227, 210, 0.14);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   font-family: "Poppins", system-ui, sans-serif;
-  transform: translate(-50%, 160%);
+  transform: translateY(160%);
   animation: usTicketPop 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) 5s forwards;
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
-.us-ticket:hover { box-shadow: 0 20px 54px rgba(0, 0, 0, 0.55), 0 0 56px rgba(70, 227, 210, 0.32); }
+.us-ticket:hover { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 40px rgba(70, 227, 210, 0.3); }
 .us-ticket:focus-visible { outline: 2px solid #46e3d2; outline-offset: 4px; }
-@keyframes usTicketPop { to { transform: translate(-50%, 0); } }
+@keyframes usTicketPop { to { transform: translateY(0); } }
 
-.us-ticket .ut-main { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 12px 16px; min-width: 0; }
-.us-ticket .ut-head { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #93a6cf; }
-.us-ticket .ut-title { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 22px; line-height: 1.1; color: #46e3d2; }
-.us-ticket .ut-route { font-size: 11px; letter-spacing: 0.14em; color: #eaf1ff; }
-.us-ticket .ut-route i { font-style: normal; color: #ffc47e; margin: 0 6px; }
+.us-ticket .ut-main { display: flex; flex-direction: column; gap: 2px; padding: 9px 12px 9px 13px; min-width: 0; }
+.us-ticket .ut-head { font-size: 8.5px; letter-spacing: 0.22em; text-transform: uppercase; color: #93a6cf; }
+.us-ticket .ut-title { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 18px; line-height: 1.1; color: #46e3d2; white-space: nowrap; }
+.us-ticket .ut-route { font-size: 10px; letter-spacing: 0.14em; color: #eaf1ff; white-space: nowrap; }
+.us-ticket .ut-route i { font-style: normal; color: #ffc47e; margin: 0 5px; }
 .us-ticket .ut-stub {
-  display: flex; align-items: center; padding: 0 16px;
-  border-left: 2px dashed rgba(147, 166, 207, 0.35);
+  display: flex; align-items: center; padding: 0 12px;
+  border-left: 1.5px dashed rgba(147, 166, 207, 0.35);
 }
 .us-ticket .ut-stub b {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
-  color: #060a17; background: #ffc47e; padding: 8px 12px; border-radius: 999px;
+  font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #060a17; background: #ffc47e; padding: 7px 10px; border-radius: 999px;
   animation: usTicketGlow 2.4s ease-in-out 6s infinite;
 }
-@keyframes usTicketGlow { 50% { box-shadow: 0 0 18px rgba(255, 196, 126, 0.75); } }
+@keyframes usTicketGlow { 50% { box-shadow: 0 0 16px rgba(255, 196, 126, 0.75); } }
+
+/* phones: even smaller, just the name and the board button */
+@media (max-width: 600px) {
+  .us-ticket { left: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); border-radius: 10px; }
+  .us-ticket .ut-head, .us-ticket .ut-route { display: none; }
+  .us-ticket .ut-main { justify-content: center; padding: 8px 10px 8px 11px; }
+  .us-ticket .ut-title { font-size: 16px; }
+  .us-ticket .ut-stub { padding: 0 9px; }
+  .us-ticket .ut-stub b { padding: 8px 10px; }       /* keeps a comfortable tap size */
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .us-ticket { animation: none; transform: translate(-50%, 0); }
+  .us-ticket { animation: none; transform: none; }
   .us-ticket .ut-stub b { animation: none; }
 }

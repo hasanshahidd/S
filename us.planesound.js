@@ -87,9 +87,12 @@ function ambience() {                               // approximate pass-over unt
 }
 
 /* the airport "bing-bong", with a little hall echo */
+let lastChime = -10;
 function chime(at = 0) {
   if (!ctx) return;
   const t = ctx.currentTime + at;
+  if (t - lastChime < 1.5) return;                 // one chime, even if enable() and board() both ask
+  lastChime = t;
   const out = ctx.createGain(); out.gain.value = 0.16;
   const echo = ctx.createDelay(); echo.delayTime.value = 0.21;
   const fb = ctx.createGain(); fb.gain.value = 0.28;
@@ -116,7 +119,8 @@ export const isOn = () => on;
 /* the "tap for sound" button on the boarding screen */
 export function enable() {
   if (!build()) return false;
-  ctx.resume?.();
+  ctx.resume?.();                                  // silent until the browser allows audio
+  if (on) return true;                             // already running: resuming was all we needed
   on = true;
   t0 = performance.now();
   nodes.master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.4);

@@ -218,14 +218,15 @@ const fill = setInterval(() => {
   }
 }, 80);
 
-/* "tap for sound": the jet passing overhead + the airport chime */
-const preSound = $("preSound");
-preSound?.addEventListener("click", () => {
-  const turnOn = !planeSound.isOn();
-  if (turnOn) planeSound.enable(); else planeSound.disable();
-  preSound.setAttribute("aria-pressed", String(turnOn));
-  preSound.querySelector("span").textContent = turnOn ? "sound on" : "tap for sound";
-});
+/* plane sound is always on: try right away (some browsers allow it), and otherwise
+   start it on the very first touch, click or key press anywhere. No button. */
+const QA_MODE = new URLSearchParams(location.search).has("qa");   // test screenshots stay silent
+if (!QA_MODE) planeSound.enable();
+const wake = () => {
+  planeSound.enable();
+  ["pointerdown", "touchstart", "keydown"].forEach((ev) => removeEventListener(ev, wake, true));
+};
+if (!QA_MODE) ["pointerdown", "touchstart", "keydown"].forEach((ev) => addEventListener(ev, wake, { capture: true, passive: true }));
 
 /* the song starts inside the tap (browsers require it) but silent, then
    rises once the take-off roar has faded (iOS ignores volume: it just plays) */

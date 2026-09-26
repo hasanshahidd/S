@@ -1656,3 +1656,14 @@ main { position: relative; z-index: 1; overflow-x: clip; }
   vertical-align: 0.12em;
   color: var(--heart);
 }
+
+/* phones: the hero's grid column sized itself to the subtitle's 46ch (~440px) and
+   pushed the title block past a 375px screen; let the column shrink to the screen */
+.hero { grid-template-columns: minmax(0, 1fr); }
+.hero-inner { width: 100%; min-width: 0; }
+@media (max-width: 600px) {
+  .flight small, .pass-via { font-size: 11px; }
+}
+@media (max-width: 600px) {
+  .hero .tag { flex-wrap: wrap; justify-content: center; row-gap: 4px; max-width: 100%; letter-spacing: 0.16em; }   /* the eyebrow wraps instead of running off a phone */
+}
