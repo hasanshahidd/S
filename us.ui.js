@@ -140,22 +140,15 @@ $("rememberList").replaceChildren(
    ========================================================= */
 const song = $("song");
 const soundBtn = $("soundBtn");
-const SONG_START = 78; // begin at 1:18, and loop back to there (not 0) at the end
 song.volume = 0.95;
-song.loop = false;     // we loop by hand so it returns to SONG_START, not the very start
+song.loop = true;      // the file is already cut to begin at 1:18, so a plain loop is right
 song.addEventListener("error", () => {
   if (!song.src.endsWith(SONG_FALLBACK)) song.src = SONG_FALLBACK;
 }, { once: true });
-const atStart = () => { try { if (song.currentTime < SONG_START - 1) song.currentTime = SONG_START; } catch (e) {} };
-let started = false;
-song.addEventListener("loadedmetadata", atStart);                 // seek early if the browser allows it
-song.addEventListener("playing", () => { if (!started) { started = true; atStart(); } }); // and again once it truly starts (reliable)
-song.addEventListener("ended", () => { started = false; atStart(); playSong(); }); // loop back to 1:18
-song.src = SONG + "?v=alfaaz118";                                 // cache-bust: never reuse an old copy
+song.src = SONG + "?v=alfaaz118cut";                              // cache-bust: fetch the newly cut file
 
 /* Resolves true/false and swallows the rejection (autoplay block or an
-   AbortError from a pause racing a pending play). Starts at 1:18 on a fresh
-   play, and keeps its place when resumed after a pause. */
+   AbortError from a pause racing a pending play). */
 function playSong() {
   return song.play().then(
     () => { soundBtn.classList.add("playing"); return true; },
