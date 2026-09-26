@@ -10,7 +10,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="us.style.css" />
   <link rel="stylesheet" href="us.scene.stars.css" />
   <link rel="stylesheet" href="us.scene.rain.css" />
@@ -132,7 +132,7 @@
       </article>
 
       <!-- 2. 19 September, with the night-drive scene  (899x1599, 9:16 portrait) -->
-      <article class="stop stop--drive" data-side="right" data-rails="road">
+      <article id="drive" class="stop stop--drive" data-side="right" data-rails="road">
         <div class="drive reveal" data-scene="drive" role="img" aria-label="Streetlights passing overhead at night, seen through a car windscreen">
           <p class="drive-cap"><em>Somewhere in the dark, your hand in mine.</em></p>
         </div>
@@ -274,29 +274,29 @@
           <p class="tag reveal">before you left</p>
           <h2 class="h2 reveal">What you left me</h2>
         </div>
-        <p class="lead reveal">A black box that says it's loved across 50+ countries around the globe. None of them love it like I do. Inside, a Sveston watch with a silver case and a black dial. A fine chain with a small round peach stone. A little card with my name on it. And a letter in your handwriting, red hearts all over it. I read it and cried. I have never felt so loved.</p>
+        <p class="lead reveal">A black Sveston box. Inside it, a Sveston watch with a silver case and a black dial, two thin silver chains, one for the wrist and a very thin one for the neck, a little card with my name on it, and a white box holding your letter, folded, with a drawing of the two of us hugging on the front. Red hearts all over the page. I read it and cried. I have never felt so loved.</p>
       </header>
 
       <div class="gift-track" data-scene="letter" data-globe="off" data-rails="none"><div class="gift-stage"></div></div>
 
       <div class="wrap gift-body">
         <figure class="photo reveal" data-photo="letter" style="aspect-ratio: 1200 / 1600">
-          <img src="images/letter-gift.webp" width="1200" height="1600" loading="lazy" decoding="async" alt="His handwritten letter with red hearts beside the gift box: a watch, a bracelet and a card with my name" />
+          <img src="images/letter-gift.webp" width="1200" height="1600" loading="lazy" decoding="async" alt="His handwritten letter with red hearts beside the open gift box: the watch, the chains and a card with my name" />
         </figure>
-        <div class="letter-lines paper reveal">
-          <p class="label letter-lines-label">from your letter</p>
-          <p class="letter-lines-sub">Only the lines the photo shows. The rest stays between us.</p>
-          <div id="letterLines"></div>
-        </div>
+        <article class="fullletter paper reveal" aria-labelledby="fullLetterLabel">
+          <p class="label fullletter-label" id="fullLetterLabel">your letter, word for word</p>
+          <div id="letterFull"></div>
+        </article>
         <div class="gift-inventory card reveal">
           <p class="label">inside the black box</p>
           <ul>
             <li><b>A Sveston watch</b><span>silver case &middot; black dial &middot; black leather strap</span></li>
-            <li><b>A fine chain bracelet</b><span>one small round peach stone</span></li>
+            <li><b>A thin silver chain</b><span>for the wrist</span></li>
+            <li><b>A very thin silver chain</b><span>for the neck</span></li>
             <li><b>A small card</b><span>with my name on it</span></li>
-            <li><b>A letter in your handwriting</b><span>red hearts all over it</span></li>
+            <li><b>A white box</b><span>your letter folded inside, the two of us hugging drawn on the front</span></li>
           </ul>
-          <p class="gift-box-note">on the box: &ldquo;Loved Across 50+ Countries Around the Globe&rdquo;</p>
+          <p class="gift-box-note">all of it in the black Sveston box</p>
         </div>
       </div>
     </section>
@@ -314,7 +314,7 @@
           <p class="myletter-salute">Shayan,</p>
           <p>You wrote that you can't even say it in words. I understand that now. I'm going to try anyway, because you deserve to have it written down somewhere you can always come back to.</p>
           <p>I still go back to that rainy night. The mirror, the two of us in black, both grinning. I didn't know then that it would become the photo I'd look at most. And the nineteenth of September, in the car in the dark, your hand in mine, two nights before you flew. I think part of me knew even then that I was holding something I'd have to let go of for a while. Not lose. Let go of, for a while. There's a difference, and I hold on to it every day.</p>
-          <p>Then came the black box. The watch with its silver case and black dial. The fine chain with the little peach stone. The card with my name on it. And your letter, covered in red hearts. You wrote that I'm an angel for you. You wrote that if I ever need you for anything, you will come, no matter what. You wrote that you're going to miss me so much I can't even imagine. I read it and I cried, and I'm not embarrassed to say so. I have never felt so loved by anyone.</p>
+          <p>Then came the black box. The watch with its silver case and black dial. The two thin chains, one for my wrist and a very thin one for my neck. The card with my name on it. And your letter, covered in red hearts. You wrote that I'm an angel for you. You wrote that if I ever need you for anything, you will come, no matter what. You wrote that you're going to miss me so much I can't even imagine. I read it and I cried, and I'm not embarrassed to say so. I have never felt so loved by anyone.</p>
           <p>On the twenty-first I watched you go, one flight after another: SV739 to Jeddah, then SV123 over France, a little green plane on my screen, and your updates keeping me company the whole way. When you landed in Manchester at 12:55, I said Alhamdulillah and finally breathed.</p>
           <p>So here is what I need you to know.</p>
           <p>I am so proud of you. It takes real courage to pack a dark grey suitcase and start a life somewhere new. You carried my name on that tag. I carry yours too: in my head, in my day, in every dua I make.</p>

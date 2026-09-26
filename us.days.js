@@ -80,7 +80,7 @@ export const DAYS = [
   "Part of me still expects to see you round the corner. I don't mind that part. It means you're still everywhere here, even while you're there.",  // day 77
   "Ask for help if you need it this week. You don't have to prove anything by doing it all alone. Asking is smart, not weak.",  // day 78
   "First frost, maybe? If the grass is white and crunchy in the morning, step on it for me. I want to know what winter sounds like there.",  // day 79
-  "Your black gift box says \"Loved Across 50+ Countries Around the Globe\". Fine, but nobody in any of them loves it like I do, here in Lahore. The watch, the fine chain with its small peach stone, the little cream card with my name. I look at them and see you.",  // day 80
+  "Your black gift box says \"Loved Across 50+ Countries Around the Globe\". Fine, but nobody in any of them loves it like I do, here in Lahore. The watch, the two thin chains, the little cream card with my name. I look at them and see you.",  // day 80
   "Watch on, bracelet on? I like knowing they're holding on to your wrist for me while I can't.",  // day 81
   "It's okay to not love Manchester every day. Nobody loves anywhere every day. You just need a few good days to hold on to, and they're coming.",  // day 82
   "Stay in, make it warm, watch something you've already seen ten times. Comfort is allowed. Sometimes it's exactly what you need.",  // day 83
@@ -337,7 +337,7 @@ export const DAYS = [
   "Eleven months tomorrow. Only one month left of your first year. Take a breath. You've already done most of it.",  // day 334
   "Eleven months in Manchester. Almost a whole year of rain, new streets, new faces, dark winter and bright summer. You're so much stronger than the person who left, and still the same in all the best ways.",  // day 335
   "Nobody finishes a year sprinting. Rest a little on the way to the milestone. You're nearly there, and you don't have to run.",  // day 336
-  "The bracelet you gave me has one small round peach stone on a fine chain. Funny how something so small can hold so much of you.",  // day 337
+  "The chains you gave me are so thin, one for my wrist and one for my neck. Funny how something so small can hold so much of you.",  // day 337
   "Water check. I've asked you this so many times this year, and I'll keep asking. Go on, have a glass.",  // day 338
   "When you look back on this year, don't only remember the hard parts. Remember the days that were just nice. There were more of those than you think.",  // day 339
   "Sending you a hug through a screen. It's not the same, I know. Save the real one for later. I'm keeping count.",  // day 340

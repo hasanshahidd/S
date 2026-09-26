@@ -3,8 +3,8 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
 /* =========================================================
    UNDER ONE SKY  -  the night drive (atmosphere beside 19 September)
-   A calm road seen through the windscreen: sodium lamps passing over,
-   two cars far ahead, a city glow on
+   A calm road seen through a wet windscreen: sodium lamps passing over,
+   their streaks on the wet asphalt, two cars far ahead, a city glow on
    the horizon. The world renders to a target; one full-screen pass then
    lays the glass over it (beads that show the road upside down, drips
    that wipe clear trails, haze, bloom) and the dark car interior.
@@ -16,9 +16,9 @@ const MOBILE = matchMedia("(max-width: 820px)").matches;
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const FINE = matchMedia("(hover: hover) and (pointer: fine)").matches;
 const PR_CAP = MOBILE ? 1.25 : 1.5;
-/* DRY: we only know it was night on 19 September, not that it rained (the rainy night
-   was the mirror selfie), so the glass stays clear and the road dry. false = rain again. */
-const DRY = true;
+/* DRY = true gives a clear windscreen and a dry road (no drops, no lamp streaks on the
+   asphalt). The owner prefers the original wet-night look, so it stays false. */
+const DRY = false;
 const N_BEADS = DRY ? 0 : MOBILE ? 40 : 70;
 const N_DRIPS = DRY ? 0 : MOBILE ? 3 : 6;
 const DEG = Math.PI / 180;

@@ -55,16 +55,41 @@ export const PHOTOS = {
   passMan:  { src: "images/pass-jed-man.webp", w: 900, h: 1600, alt: "Boarding pass SV123, Jeddah 08:15 to Manchester 12:55, 21 September (booking codes blurred)" },
 };
 
-/* Fragments from the letter he left me, copied only where the photo shows
-   them clearly. The left edge of the page is cut off in the photo, so the
-   leading "…" marks words that aren't visible. Never fill them in. */
+/* The letter he left me, folded inside the white box in the black Sveston box.
+   Transcribed word for word from the handwritten page (his spelling kept; each "~"
+   is one of the little red hearts he drew). Two spots the photo does not show cleanly:
+   the fold hides the first letter of "never", and the first word of the last line is
+   cut off ("Wherever" is our best reading). */
+export const LETTER_FULL = {
+  greeting: "Hi my ALIEN.",
+  paragraphs: [
+    "First of all I am sorry you have to read such a long letter. I am not as intelligent as you and I dont know how to make a website so I just wrote it on paper. I honestly dont know where to start. I never knew that I would ever be this lucky that I would actually find a bhai who would love me and care about me. That I would find a brother, the kind of brother I had always wished for. ~",
+    "No-one has ever made me feel this special before. May be I was never understood by anyone, and may be I never understood anyone enough to be able to tell them everything that was in my heart. ~",
+    "And then Allah gave me you. ~",
+    "I felt so safe with you that I told you things I had never told anyone before, which I had always kept inside me. I got attached with you. ~",
+    "But you know baii after meeting you, I also became so much more attached to my Allah. And because I didnt want to loose you and the only thing I could do was beg Allah not to take you away from me. I started trusting Allah so much more than I ever had before. Thats why I always say you are an angel for me. ~",
+    "Thank you so much for everything even for every little thing. For your time you gave me. ~",
+    "May Allah make your destiny even more beautiful than you. Ameen. ~",
+    "I dont know what life is going to do with me because it is so unpredictable. I always tell Allah that If I ever make it to Jannah then grant me place beside my hassan. I dont wanna go alone without you. ~",
+    "I love you so much idiot. ~",
+    "I know I am never going to be of much use to you, but if you ever need me for any thing please tell me. I will come running no matter what. ~",
+    "And I am going to miss you so much you cant even imagine how much and I cant even say it in words. ~",
+    "And please never cry again. My heart started shivering when I saw you crying. ~",
+    "You are my brave baii. ~",
+    "Always stay happy so much, keep growing and never forget that somewhere in this world there is someone who will be always praying for you. ~",
+  ],
+  closing: "Wherever I stay, I will always love you. ~",
+};
+
+/* Whole lines from that letter, for the 3D paper in the gift scene (short enough to
+   write large and clear on the unfolding page). */
 export const LETTER_LINES = [
-  "…say you are an angel for me.",
-  "…need me for any thing please tell me. I will come… no matter what.",
-  "…am going to miss you so much you cant even imagine… and I cant even say it in words.",
-  "…My heart started shivering… you crying.",
-  "…keep growing and never forget…",
-  "…always love you.",
+  "Hi my ALIEN.",
+  "And then Allah gave me you.",
+  "Thats why I always say you are an angel for me.",
+  "If you ever need me for any thing please tell me. I will come running no matter what.",
+  "You are my brave baii.",
+  "Wherever I stay, I will always love you.",
 ];
 
 /* The new page's own song. Until audio/us-song.mp3 exists, us.ui.js falls back

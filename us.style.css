@@ -1610,3 +1610,49 @@ main { position: relative; z-index: 1; overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) {
   .flap .ch.flip, .fids-status.is-boarding .ch { animation: none; }
 }
+
+/* =========================================================
+   His letter, word for word (filled from LETTER_FULL in us.data.js).
+   Warm paper, dark ink, a handwriting face: it must read clearly.
+   ========================================================= */
+.gift-body > .fullletter { justify-self: center; width: min(100%, 820px); }
+@media (min-width: 1000px) {
+  .gift-body > .photo { grid-column: 1 / span 3; grid-row: 1; }
+  .gift-body > .gift-inventory { grid-column: 4 / span 3; grid-row: 1; align-self: center; }
+  .gift-body > .fullletter { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (min-width: 1200px) {
+  .gift-body > .photo { grid-column: 2 / span 4; grid-row: 1; }
+  .gift-body > .gift-inventory { grid-column: 7 / span 5; grid-row: 1; }
+  .gift-body > .fullletter { grid-column: 2 / span 10; grid-row: 2; }
+}
+.fullletter {
+  position: relative;
+  padding: clamp(26px, 5vw, 56px) clamp(20px, 5vw, 64px) clamp(30px, 5vw, 60px);
+  color: #16203a;
+  background: linear-gradient(180deg, #fcf9f2 0%, #f4efe4 100%);
+  border-radius: 6px;
+  box-shadow: 0 34px 80px -34px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(27, 42, 74, 0.06);
+}
+.fullletter-label {
+  margin-bottom: 18px; padding-bottom: 12px;
+  border-bottom: 1px dashed rgba(27, 42, 74, 0.22);
+  color: rgba(27, 42, 74, 0.72);
+}
+#letterFull p {
+  margin: 0 0 0.7em;
+  font-family: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  font-weight: 500;
+  font-size: clamp(1.35rem, 1.05rem + 1vw, 1.8rem);
+  line-height: 1.38;
+  color: #16203a;
+}
+#letterFull .fl-greet { font-weight: 600; font-size: clamp(1.7rem, 1.25rem + 1.3vw, 2.2rem); margin-bottom: 0.5em; }
+#letterFull .fl-close { font-weight: 600; margin-top: 1em; margin-bottom: 0; }
+#letterFull .heart {
+  margin-left: 0.25em;
+  font-family: var(--sans);
+  font-size: 0.66em;
+  vertical-align: 0.12em;
+  color: var(--heart);
+}

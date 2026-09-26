@@ -6,13 +6,17 @@ import { PALETTE, LETTER_LINES } from "./us.data.js";
 /* =========================================================
    UNDER ONE SKY  -  "what you left me"
    Scroll-scrubbed on one sticky full-screen stage:
-     box    : his black magnetic gift box in a pool of warm lamplight;
-              the lid swings open ("Loved Across 50+ Countries Around
-              the Globe" printed inside) and a glow comes up from within
-     inside : on dark glitter foam, the watch (silver case, black dial,
-              black leather strap), the fine chain bracelet with its small
-              round peach stone, and the little cream card: "Hassan"
-     letter : his folded letter rises out of the box, opens panel by
+     box    : his matte black Sveston box (white SVESTON wordmark and
+              round S mark, a glossy skyline print along the front edge)
+              in a pool of warm lamplight; the lid swings open ("Loved
+              Across 50+ Countries Around the Globe" printed inside)
+     inside : on dark glitter foam, the Sveston watch (silver case, black
+              dial, black leather strap), a small grey box with two thin
+              silver chains (a bracelet and a very fine neck chain), and
+              a white display box holding his folded letter, a pencil
+              drawing of the two of us hugging on its face, over the
+              little cream card: "Hassan"
+     letter : the letter rises out of the white box, opens panel by
               panel, and his words write themselves on, line by line,
               each with a small red heart (exactly LETTER_LINES)
      air    : a few warm motes drifting in the light
@@ -26,11 +30,11 @@ const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const FINE = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 const TAU = Math.PI * 2;
 
-const HAND_FAMILY = "Nothing You Could Do";
+const HAND_FAMILY = "Caveat";
 const SERIF_FAMILY = "Instrument Serif";
 const HAND = `"${HAND_FAMILY}", "Segoe Print", "Bradley Hand", cursive`;
 const SERIF = `"${SERIF_FAMILY}", Georgia, "Times New Roman", serif`;
-const INK = "#1b1d29";
+const INK = "#141a33"; // blue-black, full strength: his words must read clearly
 
 /* the box, world units (1 ≈ 8 cm), floor at y = 0, lid hinged at the back */
 const BW = 2.6, BD = 1.8, BH = 0.46, WALL = 0.06, BEV = 0.01;
@@ -56,8 +60,8 @@ const KEYS = [
   { p: 1.0, letter: 0.94 },
 ];
 /* portrait screens: the lid framed on its printing, and the inside shown one
-   column at a time (letter + bracelet, then card + watch) so a phone can read
-   his card and see the chain */
+   column at a time (the chains, then the white box + watch) so a phone can
+   see the chains and the drawing on his letter */
 const KEYS_TALL = [
   { ...KEYS[0], w: 3.0 },
   { ...KEYS[1], w: 2.2 },
@@ -69,24 +73,28 @@ const KEYS_TALL = [
 ];
 const LETTER_AT = new THREE.Vector3(0, 1.4, 0.85);
 const LETTER_DIR = new THREE.Vector3(0, 0.16, 1).normalize();
-const P_IN = new THREE.Vector3(-0.62, FOAM_Y + BOW + 0.002, -0.4);  // folded, on the foam
-const P_MID = new THREE.Vector3(-0.4, 1.3, -0.1);                  // lifted clear of the box
-const Q_IN = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0.1));
+/* folded small (S_IN) in the white box, on top of the card; lifted clear of the box */
+const FRAME_AT = new THREE.Vector3(0.6, FOAM_Y, -0.42), FRAME_ROT = -0.06, S_IN = 0.5;
+const P_IN = FRAME_AT.clone().setY(FOAM_Y + 0.018 + BOW + 0.0015);
+const P_MID = new THREE.Vector3(0.3, 1.3, -0.2);
+const Q_IN = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, FRAME_ROT));
 
 /* the three beats, as real (visible) text */
 const CAPS = [
   ["a black box", -1, 0, 0.05, 0.09],
-  ["a watch, a bracelet, and a little card with my name", 0.16, 0.19, 0.28, 0.31],
-  ["and your letter, in your handwriting", 0.32, 0.35, 0.46, 0.5],
+  ["a watch, two thin chains, and your letter with us hugging on it", 0.16, 0.19, 0.28, 0.31],
+  ["and under it, my name; then your words, in your handwriting", 0.32, 0.35, 0.46, 0.5],
 ];
 const CAPS_TALL = [CAPS[0], [CAPS[1][0], 0.16, 0.19, 0.32, 0.35], [CAPS[2][0], 0.35, 0.38, 0.46, 0.5]];
 const SR_TEXT =
-  "The box you left me, opening as you scroll. A black box; inside the lid it reads " +
-  "“Loved Across 50+ Countries Around the Globe”. On dark foam inside: the watch, " +
-  "with a silver case, a black dial and a black leather strap; the fine chain bracelet with a " +
-  "small round peach stone; and a small cream card with my name, Hassan. Then your folded letter " +
-  "rises out of the box and opens, and your words appear line by line, each with a small red " +
-  "heart. The same lines are written out below.";
+  "The box you left me, opening as you scroll. A matte black Sveston box, the SVESTON name in white " +
+  "on the lid and a glossy city skyline along one edge; inside the lid it reads " +
+  "“Loved Across 50+ Countries Around the Globe”. On dark foam inside: the Sveston watch, " +
+  "with a silver case, a black dial and a black leather strap; a small grey box with two thin " +
+  "silver chains, a bracelet and a very thin chain for the neck; and a white box holding your " +
+  "folded letter, a pencil drawing of the two of us hugging on its front, over a small cream card " +
+  "with my name, Hassan. Then the letter rises out of the white box and opens, and your words " +
+  "appear line by line, each with a small red heart. The same lines are written out below.";
 
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const sstep = (a, b, v) => { const x = clamp((v - a) / (b - a)); return x * x * (3 - 2 * x); };
@@ -120,12 +128,12 @@ let FONTS = null;
 function fontsReady() {
   if (FONTS) return FONTS;
   const link = Object.assign(document.createElement("link"), {
-    rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap",
+    rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap",
   });
   const css = new Promise((r) => { link.onload = link.onerror = r; });
   document.head.append(link);
   if (!document.fonts) return (FONTS = css);
-  const load = () => Promise.all([document.fonts.load(`64px ${HAND}`), document.fonts.load(`64px ${SERIF}`)]);
+  const load = () => Promise.all([document.fonts.load(`600 64px ${HAND}`), document.fonts.load(`64px ${SERIF}`)]);
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   // a second try covers the face itself arriving late
   const go = css.then(() => document.fonts.ready).then(load).then(() => (fontOK(HAND_FAMILY) ? 0 : wait(1500).then(load)));
@@ -174,6 +182,108 @@ function drawLiner(c) {
   g.letterSpacing = "0px";
   g.font = font(32);
   g.fillText("Around the Globe", w / 2, cy + 70 * s);
+}
+
+/* top of the lid, as printed: matte black board, the white SVESTON wordmark with
+   its round S mark, and a glossy black city skyline along the front edge.
+   Returns its roughness map (G): matte board, near-mirror skyline */
+function drawLidTop(c) {
+  const g = c.getContext("2d"), w = c.width, h = c.height, s = w / 1024, R = rng(29);
+  const rm = makeCanvas(w, h), q = rm.getContext("2d");
+  g.fillStyle = "#0e0e11";
+  g.fillRect(0, 0, w, h);
+  q.fillStyle = "rgb(0,150,0)";
+  q.fillRect(0, 0, w, h);
+  const sky = new Path2D();
+  sky.moveTo(0, h);
+  for (let x = 0; x < w; ) {
+    const bw = (0.02 + R() * 0.05) * w, top = h * (0.93 - R() * R() * 0.3), k = R();
+    sky.lineTo(x, top);
+    if (k < 0.18) sky.lineTo(x + bw / 2, top - h * (0.06 + R() * 0.1)); // spire
+    else if (k < 0.3) sky.arc(x + bw / 2, top, bw / 2, Math.PI, 0);    // dome
+    x = Math.min(w, x + bw);
+    sky.lineTo(x, top);
+  }
+  sky.lineTo(w, h);
+  sky.closePath();
+  g.fillStyle = "#060607";
+  g.fill(sky);
+  q.fillStyle = "rgb(0,18,0)";
+  q.fill(sky);
+  // round S mark + SVESTON in white serif capitals, centred as one group
+  const font = (n) => `bold ${n * s}px "Times New Roman", Times, Georgia, serif`;
+  const r = 46 * s, gap = 30 * s, cy = h * 0.4;
+  g.font = font(112);
+  g.letterSpacing = `${6 * s}px`;
+  const tw = g.measureText("SVESTON").width, x0 = (w - (2 * r + gap + tw)) / 2;
+  g.fillStyle = g.strokeStyle = "#f2f0ec";
+  g.textBaseline = "middle";
+  g.textAlign = "left";
+  g.fillText("SVESTON", x0 + 2 * r + gap, cy + 4 * s);
+  g.letterSpacing = "0px";
+  g.lineWidth = 5 * s;
+  g.beginPath();
+  g.arc(x0 + r, cy, r, 0, TAU);
+  g.stroke();
+  g.textAlign = "center";
+  g.font = font(62);
+  g.fillText("S", x0 + r, cy + 3 * s);
+  g.font = font(20);
+  g.fillText("®", x0 + 2 * r + gap + tw + 14 * s, cy - 42 * s);
+  return rm;
+}
+
+/* the folded letter's outside face: his pencil drawing of the two of us
+   hugging, one figure shaded grey. Painted over the top third of the paper
+   (the panel that shows when folded), upside down so it reads upright then */
+function drawHug(c, paper) {
+  const g = c.getContext("2d"), w = c.width, h = c.height, u = h / 100, cx = w / 2, R = rng(31);
+  const LEAD = "#26262b", GREY = "#8e8e94", WHITE = "#f5efe6";
+  g.drawImage(paper, 0, 0, paper.width, paper.height / 3, 0, 0, w, h);
+  g.save();
+  g.translate(0, h);
+  g.scale(1, -1);
+  g.lineCap = g.lineJoin = "round";
+  const ell = (x, y, rx, ry, a = 0) => { const p = new Path2D(); p.ellipse(cx + x * u, y * u, rx * u, ry * u, a, 0, TAU); return p; };
+  const shape = (p, fill, shade) => {
+    g.fillStyle = fill;
+    g.fill(p);
+    if (shade) { // soft pencil hatching
+      g.save();
+      g.clip(p);
+      g.strokeStyle = "rgba(40,40,46,0.3)";
+      g.lineWidth = 0.35 * u;
+      for (let x = -h; x < w; x += 1.1 * u) {
+        g.beginPath();
+        g.moveTo(x, h);
+        g.lineTo(x + h * 0.9 + R() * u, 0);
+        g.stroke();
+      }
+      g.restore();
+    }
+    g.strokeStyle = LEAD;
+    g.lineWidth = 1.1 * u;
+    g.stroke(p);
+  };
+  const arm = (x0, y0, xc, yc, x1, y1, fill) => {
+    const p = new Path2D();
+    p.moveTo(cx + x0 * u, y0 * u);
+    p.quadraticCurveTo(cx + xc * u, yc * u, cx + x1 * u, y1 * u);
+    g.strokeStyle = LEAD;
+    g.lineWidth = 11 * u;
+    g.stroke(p);
+    g.strokeStyle = fill;
+    g.lineWidth = 8.8 * u;
+    g.stroke(p);
+    shape(ell(x1 + 2, y1 + 1, 5, 4.2), fill); // the hand
+  };
+  shape(ell(-20, 92, 27, 36, 0.25), GREY, true);
+  shape(ell(20, 94, 27, 36, -0.25), WHITE);
+  shape(ell(-13, 36, 15, 14.5), GREY, true);
+  shape(ell(13, 33, 15, 14.5), WHITE);
+  arm(-8, 66, 14, 58, 30, 70, GREY);  // round your back
+  arm(8, 76, -14, 70, -31, 80, WHITE); // round mine
+  g.restore();
 }
 
 /* the small cream card with my name */
@@ -369,12 +479,12 @@ function drawInk(c) {
   const g = c.getContext("2d"), W = c.width, H = c.height;
   g.clearRect(0, 0, W, H);
   // the phone canvas: narrower margins and a taller block, so the hand reads bigger
-  const small = W < 800, mx = W * (small ? 0.075 : 0.115), aw = W - 2 * mx, fitH = H * (small ? 0.86 : 0.8);
-  let fs = W * 0.058, lh = 0, gap = 0, rows = [], total = 0;
+  const small = W < 800, mx = W * (small ? 0.065 : 0.09), aw = W - 2 * mx, fitH = H * (small ? 0.9 : 0.86);
+  let fs = W * 0.1, lh = 0, gap = 0, rows = [], total = 0;
   const lay = () => {
-    g.font = `${fs}px ${HAND}`;
-    lh = fs * 1.6;
-    gap = fs * 0.62;
+    g.font = `600 ${fs}px ${HAND}`;
+    lh = fs * 1.3;
+    gap = fs * 0.4;
     rows = [];
     LETTER_LINES.forEach((text, fi) => {
       const out = [];
@@ -400,7 +510,7 @@ function drawInk(c) {
   const R = rng(17), lines = [], spans = [];
   g.textAlign = "left";
   g.textBaseline = "alphabetic";
-  let y = Math.max(H * (small ? 0.065 : 0.09), (H - total) / 2 - H * 0.02) + lh * 0.72, acc = 0;
+  let y = Math.max(H * (small ? 0.05 : 0.07), (H - total) / 2 - H * 0.02) + lh * 0.72, acc = 0;
   rows.forEach((r, i) => {
     if (i && rows[i - 1].fi !== r.fi) { y += gap; acc += aw * 0.28; } // a breath between fragments
     const w = g.measureText(r.s).width, x = mx + (R() - 0.5) * fs * 0.25;
@@ -408,10 +518,7 @@ function drawInk(c) {
     g.translate(x, y);
     g.rotate((R() - 0.5) * 0.014);
     g.fillStyle = INK;
-    g.shadowColor = "rgba(20,22,40,0.35)";
-    g.shadowBlur = fs * 0.04;
     g.fillText(r.s, 0, 0);
-    g.shadowBlur = 0;
     let end = w;
     if (r.heart) {
       const hs = fs * 0.44, hx = w + fs * 0.5;
@@ -431,8 +538,10 @@ function drawInk(c) {
 
 /* every canvas the scene paints, per screen class: [cache key, w, h, draw, font] */
 function artSpec(mobile) {
-  const PL = mobile ? 1024 : 1536, IL = mobile ? 1024 : 1792;
+  const PL = mobile ? 1024 : 1536, IL = mobile ? 1024 : 1792, HW = mobile ? 768 : 1024;
+  const paper = [`paper${PL}`, Math.round(PL / Math.SQRT2), PL, drawPaper];
   return {
+    lid: [`lid${mobile}`, mobile ? 768 : 1024, mobile ? 543 : 724, drawLidTop],
     liner: [`liner${mobile}`, mobile ? 768 : 1024, mobile ? 524 : 698, drawLiner],
     card: [`card${mobile}`, mobile ? 384 : 512, mobile ? 262 : 349, drawCard, SERIF_FAMILY],
     dial: [`dial${mobile}`, mobile ? 384 : 512, mobile ? 384 : 512, drawDial],
@@ -440,7 +549,8 @@ function artSpec(mobile) {
     foam: [`foam${mobile}`, mobile ? 256 : 512, mobile ? 256 : 512, drawFoam],
     weave: ["weave", 256, 256, drawWeave],
     fade: ["fade", 256, 256, drawFade],
-    paper: [`paper${PL}`, Math.round(PL / Math.SQRT2), PL, drawPaper],
+    paper,
+    hug: [`hug${PL}`, HW, Math.round((HW * Math.SQRT2) / 3), (c) => drawHug(c, art(...paper).c)],
     ink: [`ink${IL}`, Math.round(IL / Math.SQRT2), IL, drawInk, HAND_FAMILY],
   };
 }
@@ -515,6 +625,7 @@ const INK_FRAG = /* glsl */ `
     }
   }
   diffuseColor.rgb = mix(diffuseColor.rgb, ink.rgb, ink.a * show);
+  totalEmissiveRadiance *= 1.0 - ink.a * show; // the paper glows, the ink stays dark
 }`;
 
 /* warm motes: soft points rising slowly through the light, fading at both ends */
@@ -679,8 +790,12 @@ export function mount(el) {
     const A = artSpec(mobile);
     const linerE = art(...A.liner), cardE = art(...A.card), dialE = art(...A.dial), leatherE = art(...A.leather);
     const foamE = art(...A.foam), weaveE = art(...A.weave), fadeE = art(...A.fade), paperE = art(...A.paper), inkE = art(...A.ink);
+    const lidE = art(...A.lid), hugE = art(...A.hug);
 
     const linerTex = tex(linerE.c), cardTex = tex(cardE.c), inkTex = tex(inkE.c), paperTex = tex(paperE.c);
+    const hugTex = tex(hugE.c), lidTex = tex(lidE.c);
+    hugTex.repeat.set(1, 3); // the top panel's third of the uv (v 2/3..1) -> the whole drawing
+    hugTex.offset.set(0, -2);
     const foamTex = tex(foamE.c), foamRM = tex(foamE.out, false);
     for (const t of [foamTex, foamRM]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 2); }
     const weaveTex = tex(weaveE.c);
@@ -689,7 +804,11 @@ export function mount(el) {
 
     /* --- materials --- */
     const M = {
-      box: new THREE.MeshPhysicalMaterial({ color: 0x0d0d10, roughness: 0.52, clearcoat: 0.35, clearcoatRoughness: 0.45, envMapIntensity: 0.35 }),
+      box: new THREE.MeshPhysicalMaterial({ color: 0x0d0d10, roughness: 0.62, clearcoat: 0.15, clearcoatRoughness: 0.6, envMapIntensity: 0.3 }),
+      lidTop: new THREE.MeshStandardMaterial({
+        map: lidTex, roughnessMap: tex(lidE.out, false), roughness: 1, envMapIntensity: 0.7,
+        emissive: 0xffffff, emissiveMap: lidTex, emissiveIntensity: 0.08,
+      }),
       liner: new THREE.MeshStandardMaterial({ map: linerTex, emissive: 0xffffff, emissiveMap: linerTex, emissiveIntensity: 0.1, roughness: 0.75, envMapIntensity: 0.2 }),
       foam: new THREE.MeshStandardMaterial({ map: foamTex, roughnessMap: foamRM, metalnessMap: foamRM, roughness: 1, metalness: 1, envMapIntensity: 0.5 }),
       steel: new THREE.MeshPhysicalMaterial({ color: 0xd8dce2, metalness: 1, roughness: 0.16, clearcoat: 0.4, envMapIntensity: 1.3 }),
@@ -700,15 +819,12 @@ export function mount(el) {
       grey: new THREE.MeshStandardMaterial({ color: 0x5f6368, roughness: 0.85, envMapIntensity: 0.4 }),
       velvet: new THREE.MeshPhysicalMaterial({ color: 0x0a0a0c, roughness: 0.95, sheen: 1, sheenRoughness: 0.5, sheenColor: 0x3a3a44, envMapIntensity: 0.25 }),
       silver: new THREE.MeshStandardMaterial({ color: 0xe8eaee, metalness: 1, roughness: 0.2, envMapIntensity: 1.3 }),
-      stone: new THREE.MeshPhysicalMaterial({
-        color: 0xf1ab86, roughness: 0.26, clearcoat: 1, clearcoatRoughness: 0.05, sheen: 0.5, sheenColor: 0xffd9c4,
-        emissive: 0x4a1d0c, emissiveIntensity: 0.3, envMapIntensity: 0.9,
-      }),
-      frame: new THREE.MeshPhysicalMaterial({ color: 0xdcd7e8, roughness: 0.3, clearcoat: 0.5, envMapIntensity: 0.6 }),
+      frame: new THREE.MeshPhysicalMaterial({ color: 0xe6e4ec, roughness: 0.3, clearcoat: 0.5, envMapIntensity: 0.6 }),
       frameBase: new THREE.MeshStandardMaterial({ color: 0x121215, roughness: 0.9 }),
       card: new THREE.MeshStandardMaterial({ map: cardTex, roughness: 0.8, envMapIntensity: 0.3 }),
       paperF: new THREE.MeshStandardMaterial({ map: paperTex, roughness: 0.88, envMapIntensity: 0.35, emissive: 0xfff1dc, emissiveIntensity: 0 }),
       paperB: new THREE.MeshStandardMaterial({ map: paperTex, roughness: 0.9, envMapIntensity: 0.35, side: THREE.BackSide }),
+      paperHug: new THREE.MeshStandardMaterial({ map: hugTex, roughness: 0.9, envMapIntensity: 0.35, side: THREE.BackSide }),
       floor: new THREE.MeshStandardMaterial({ map: weaveTex, alphaMap: tex(fadeE.c, false), transparent: true, depthWrite: false, roughness: 0.95, envMapIntensity: 0.15 }),
     };
     Object.values(M).forEach(keep);
@@ -739,7 +855,7 @@ export function mount(el) {
     };
     fontsReady().then(() => {
       if (!alive) return;
-      if (reart(inkE, drawInk, HAND_FAMILY)) { inkTex.needsUpdate = true; setInk(inkE.out); dirty = true; }
+      if (reart(inkE, drawInk, HAND_FAMILY)) { inkTex.needsUpdate = true; setInk(inkE.out); dirty = true; } // was drawn in a fallback face
       if (reart(cardE, drawCard, SERIF_FAMILY)) { cardTex.needsUpdate = true; dirty = true; }
     });
 
@@ -766,6 +882,8 @@ export function mount(el) {
     box.add(lid);
     put(lid, keep(new RoundedBoxGeometry(BW + 0.03, LID_T, LID_L, 2, 0.016)), M.box, 0, LID_T / 2, LID_L / 2);
     put(lid, keep(new RoundedBoxGeometry(BW + 0.03, FLAP_H + LID_T, 0.045, 2, 0.016)), M.box, 0, (LID_T - FLAP_H) / 2, LID_L - 0.0225);
+    // printed on top: SVESTON, its S mark and the glossy skyline (seen while shut)
+    put(lid, keep(new THREE.PlaneGeometry(BW - 0.01, LID_L - 0.04).rotateX(-Math.PI / 2)), M.lidTop, 0, LID_T + 0.0012, LID_L / 2, false);
     // printed inside: faces down when shut, towards us once the lid stands up
     const liner = put(lid, keep(new THREE.PlaneGeometry(BW - 0.1, LID_L - 0.165)), M.liner, 0, -0.0015, (LID_L - 0.045) / 2, false);
     liner.rotation.x = Math.PI / 2;
@@ -804,59 +922,65 @@ export function mount(el) {
     };
     setHands();
 
-    /* --- the bracelet in its little grey box: fine chain + round peach stone --- */
+    /* --- the little grey box with two thin silver chains: a bracelet, and a
+       longer, finer chain for the neck draped loosely around it --- */
     const bb = new THREE.Group();
-    bb.position.set(-0.62, FOAM_Y, 0.4);
+    bb.position.set(-0.6, FOAM_Y, 0.1);
     bb.rotation.y = 0.06;
     box.add(bb);
     const PAD = 0.1;
     put(bb, keep(trayGeo(0.84, 0.68, 0.14, 0.022, 0.02, 0.005, 4)), M.grey);
     put(bb, keep(new THREE.PlaneGeometry(0.8, 0.64).rotateX(-Math.PI / 2)), M.velvet, 0, PAD, 0, false);
-    const loop = new THREE.CatmullRomCurve3(Array.from({ length: 28 }, (_, i) => {
-      const t = (i / 28) * TAU;
-      return new THREE.Vector3(0.25 * Math.cos(t) + 0.025 * Math.sin(2 * t), 0, 0.18 * Math.sin(t) + 0.018 * Math.cos(3 * t));
-    }), true, "centripetal");
-    const NL = mobile ? 96 : 150;
-    const links = keep(new THREE.InstancedMesh(keep(new THREE.TorusGeometry(0.0072, 0.0019, seg(6), seg(12))), M.silver, NL));
-    {
+    const claspRing = keep(new THREE.TorusGeometry(0.012, 0.003, 8, 20).rotateX(Math.PI / 2));
+    const claspBar = keep(new THREE.CapsuleGeometry(0.006, 0.02, 4, 8).rotateZ(Math.PI / 2));
+    // a closed loop of n links (torus r, tube) through xz(t), t in 0..TAU, clasp at claspU
+    const chain = (xz, n, r, tube, claspU, cs) => {
+      const loop = new THREE.CatmullRomCurve3(Array.from({ length: 36 }, (_, i) => new THREE.Vector3(...xz((i / 36) * TAU))), true, "centripetal");
+      const links = keep(new THREE.InstancedMesh(keep(new THREE.TorusGeometry(r, tube, seg(6), seg(12))), M.silver, n));
       const up = new THREE.Vector3(0, 1, 0), X = new THREE.Vector3(), Y = new THREE.Vector3(), Z = new THREE.Vector3();
       const at = new THREE.Vector3(), mtx = new THREE.Matrix4(), stretch = new THREE.Vector3(1.35, 1, 1);
-      for (let i = 0; i < NL; i++) { // alternate links stand up / lie flat, like a real curb chain
-        loop.getPointAt(i / NL, at);
-        loop.getTangentAt(i / NL, X);
+      for (let i = 0; i < n; i++) { // alternate links stand up / lie flat, like a real curb chain
+        loop.getPointAt(i / n, at);
+        loop.getTangentAt(i / n, X);
         if (i % 2) Z.copy(up);
         else Z.crossVectors(X, up).normalize();
         Y.crossVectors(Z, X).normalize();
         mtx.makeBasis(X, Y, Z).scale(stretch);
-        at.y = PAD + (i % 2 ? 0.0022 : 0.0093);
+        at.y = PAD + (i % 2 ? tube * 1.15 : r + tube * 1.1);
         links.setMatrixAt(i, mtx.setPosition(at));
       }
       links.receiveShadow = true;
       bb.add(links);
-      const stoneAt = loop.getPoint(0.25);
-      put(bb, keep(new THREE.CylinderGeometry(0.046, 0.048, 0.016, seg(32))), M.silver, stoneAt.x, PAD + 0.008, stoneAt.z);
-      put(bb, keep(new THREE.SphereGeometry(0.04, seg(32), seg(16))), M.stone, stoneAt.x, PAD + 0.016, stoneAt.z, false).scale.set(1, 0.5, 1);
-      const claspAt = loop.getPoint(0.81);
-      put(bb, keep(new THREE.TorusGeometry(0.012, 0.003, 8, 20).rotateX(Math.PI / 2)), M.silver, claspAt.x, PAD + 0.003, claspAt.z, false);
-      put(bb, keep(new THREE.CapsuleGeometry(0.006, 0.02, 4, 8).rotateZ(Math.PI / 2)), M.silver, claspAt.x + 0.025, PAD + 0.006, claspAt.z, false);
-    }
+      const c = loop.getPoint(claspU);
+      put(bb, claspRing, M.silver, c.x, PAD + 0.003 * cs, c.z, false).scale.setScalar(cs);
+      put(bb, claspBar, M.silver, c.x + 0.025 * cs, PAD + 0.006 * cs, c.z, false).scale.setScalar(cs);
+    };
+    // the bracelet: a small round of fine links
+    chain((t) => [-0.03 + 0.17 * Math.cos(t) + 0.018 * Math.sin(2 * t), 0, 0.02 + 0.125 * Math.sin(t) + 0.012 * Math.cos(3 * t)],
+      mobile ? 84 : 124, 0.0068, 0.0018, 0.81, 1);
+    // the neck chain: twice as long, very fine, lying in loose uneven curves round the box
+    chain((t) => [0.33 * Math.cos(t) + 0.03 * Math.sin(3 * t + 0.6), 0,
+      0.245 * Math.sin(t) + 0.03 * Math.cos(2 * t) + 0.015 * Math.sin(5 * t)],
+      mobile ? 240 : 360, 0.0045, 0.0011, 0.3, 0.6);
 
-    /* --- the little cream card with my name, in its pale lilac frame --- */
+    /* --- the white display box: the folded letter (the letter group below)
+       lies in it on top of the little cream card with my name --- */
     const cf = new THREE.Group();
-    cf.position.set(0.6, FOAM_Y, -0.42);
-    cf.rotation.y = -0.06;
+    cf.position.copy(FRAME_AT);
+    cf.rotation.y = FRAME_ROT;
     box.add(cf);
     put(cf, keep(trayGeo(0.76, 0.76, 0.05, 0.085, 0.02, 0.006, 4)), M.frame);
     put(cf, keep(new THREE.PlaneGeometry(0.6, 0.6).rotateX(-Math.PI / 2)), M.frameBase, 0, 0.012, 0, false);
     put(cf, keep(new THREE.BoxGeometry(0.44, 0.005, 0.3)), M.card, 0.01, 0.0155, 0.01).rotation.y = -0.18;
 
-    /* --- the letter: three hinged panels (front = his writing, back = plain paper) --- */
+    /* --- the letter: three hinged panels (front = his writing, back = plain
+       paper; the top panel's back, the face that shows when folded, has the hug) --- */
     const letter = new THREE.Group();
     scene.add(letter);
-    const sheet = (parent, geo) => {
+    const sheet = (parent, geo, back = M.paperB) => {
       const f = new THREE.Mesh(geo, M.paperF);
       f.castShadow = f.receiveShadow = true;
-      const b = new THREE.Mesh(geo, M.paperB);
+      const b = new THREE.Mesh(geo, back);
       b.receiveShadow = true;
       parent.add(f, b);
     };
@@ -867,7 +991,7 @@ export function mount(el) {
     const botHinge = new THREE.Group();
     botHinge.position.y = -PH / 2;
     letter.add(topHinge, botHinge);
-    sheet(topHinge, keep(panelGeo(2 / 3, PH / 2, sx)));
+    sheet(topHinge, keep(panelGeo(2 / 3, PH / 2, sx)), M.paperHug);
     sheet(botHinge, keep(panelGeo(0, -PH / 2, sx)));
 
     /* --- warm motes --- */
@@ -968,6 +1092,8 @@ export function mount(el) {
       // the letter rises, turns to us, and opens: top panel first (it was folded last)
       const r = sstep(...TL.rise, p);
       bez(P_IN, P_MID, LETTER_AT, r, letter.position);
+      const ls = S_IN + (1 - S_IN) * sstep(0.05, 0.6, r); // folded small in the white box, full size in the air
+      letter.scale.set(ls, ls, 1);
       letter.quaternion.slerpQuaternions(Q_IN, Q_END, sstep(0.08, 0.92, r));
       letter.rotateX(-Math.sin(Math.PI * r) * 0.35); // paper catching the air
       const ut = sstep(...TL.top, p), ub = sstep(...TL.bot, p);
@@ -976,7 +1102,7 @@ export function mount(el) {
       botHinge.rotation.x = -(Math.PI + (CREASE - Math.PI) * ub);
       botHinge.position.z = EPS * (1 - ub);
       inkU.uReveal.value = clamp((p - TL.ink[0]) / (TL.ink[1] - TL.ink[0]));
-      M.paperF.emissiveIntensity = 0.07 * sstep(0.46, 0.62, p); // warms as it turns to us
+      M.paperF.emissiveIntensity = 0.16 * sstep(0.46, 0.62, p); // warms as it turns to us (never the ink)
 
       moteMat.uniforms.uTime.value = t;
       moteMat.uniforms.uOpacity.value = 0.2 + 0.3 * a + 0.5 * sstep(0.46, 0.7, p);
