@@ -146,16 +146,17 @@ song.loop = false;     // we loop by hand so it returns to SONG_START, not the v
 song.addEventListener("error", () => {
   if (!song.src.endsWith(SONG_FALLBACK)) song.src = SONG_FALLBACK;
 }, { once: true });
-const seekStart = () => { try { if (song.currentTime < SONG_START - 0.5) song.currentTime = SONG_START; } catch (e) {} };
-song.addEventListener("loadedmetadata", seekStart);
-song.addEventListener("ended", () => { seekStart(); playSong(); });   // loop back to 1:18
-song.src = SONG;
+const atStart = () => { try { if (song.currentTime < SONG_START - 1) song.currentTime = SONG_START; } catch (e) {} };
+let started = false;
+song.addEventListener("loadedmetadata", atStart);                 // seek early if the browser allows it
+song.addEventListener("playing", () => { if (!started) { started = true; atStart(); } }); // and again once it truly starts (reliable)
+song.addEventListener("ended", () => { started = false; atStart(); playSong(); }); // loop back to 1:18
+song.src = SONG + "?v=alfaaz118";                                 // cache-bust: never reuse an old copy
 
 /* Resolves true/false and swallows the rejection (autoplay block or an
    AbortError from a pause racing a pending play). Starts at 1:18 on a fresh
    play, and keeps its place when resumed after a pause. */
 function playSong() {
-  if (song.currentTime < 1) seekStart();
   return song.play().then(
     () => { soundBtn.classList.add("playing"); return true; },
     () => { soundBtn.classList.remove("playing"); return false; }
