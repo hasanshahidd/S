@@ -16,11 +16,10 @@ import { PALETTE, LETTER_FULL } from "./us.data.js";
               a white display box holding his folded letter, a pencil
               drawing of the two of us hugging on its face, over the
               little cream card: "Hassan"
-     letter : the letter rises out of the white box ("Hi my ALIEN." at its
-              top) and opens panel by panel; the camera comes in until the
-              paper fills a reading window, and a real-text copy of the
-              whole letter (LETTER_FULL) fades in exactly over it. Further
-              scroll then moves his words up through that window
+     letter : the letter rises out of the white box, his whole letter
+              (LETTER_FULL) written on it in his hand, and opens panel by
+              panel; the camera comes in to read, and further scroll moves
+              his words up through the sheet to the last line
      air    : a few warm motes drifting in the light
    All procedural (the downloaded watch is a sports chronograph, not
    his plain dress watch): reflections come from three's RoomEnvironment.
@@ -46,15 +45,17 @@ const LID_T = 0.05, LID_L = BD + 0.07, FLAP_H = 0.36, LID_OPEN = 1.9;
 /* the letter: A-paper ratio, folded in three, writing inside */
 const LW = 1.1, LH = LW * Math.SQRT2, PH = LH / 3;
 const CREASE = 0.12, BOW = 0.012, EPS = 0.0025;
-/* the greeting on the 3D paper, as fractions of the paper: left edge, baseline,
-   size. Mirrors .lt-letter-body's padding (8%, 6cqh) and .lt-greet's 4.5cqh,
-   so the real-text letter lands on it exactly */
+/* his writing on the 3D paper, as fractions of one sheet: left margin, the
+   greeting's baseline and size, the body's size (bigger on phones, where the
+   sheet is smaller on screen) */
 const GREET = { x: 0.08, y: 0.102, fs: 0.045 };
+const BODY_FS = (mobile) => (mobile ? 0.042 : 0.036);
+const HEART = "#d23a4f";
 
 /* box timeline, 0..1 over the first boxSpan() px of scroll (the old track's span,
    so the box keeps its pacing): box and gifts, the unfold, then the camera
-   comes in to read (cam) and his real-text letter fades in over the paper (read) */
-const TL = { lid: [0.04, 0.16], rise: [0.3, 0.46], top: [0.38, 0.45], bot: [0.42, 0.5], cam: [0.52, 0.66], read: [0.66, 0.72] };
+   comes in to read (cam) */
+const TL = { lid: [0.04, 0.16], rise: [0.3, 0.46], top: [0.38, 0.45], bot: [0.42, 0.5], cam: [0.52, 0.66] };
 const READ_AT = 0.76;   // his words start moving at this point of the box timeline
 const READ_RATE = 1.3;  // px of scroll per px the letter moves: a touch slower than the page
 const boxSpan = () => (MQ.matches ? 1.6 : 2.2) * window.innerHeight;
@@ -66,7 +67,7 @@ const KEYS = [
   { p: 0.28, t: [0.05, 0.32, 0.1], d: [0.14, 1.25, 0.8], w: 2.95, h: 2.05 },
   { p: 0.4, t: [-0.2, 1.0, 0.1], d: [-0.06, 0.45, 1], w: 3.3, h: 2.8 },
   { p: 0.52, letter: 1 },
-  { p: 0.66, read: 1 }, // the paper fills the reading window (sized by .lt-letter)
+  { p: 0.66, read: 1 }, // a touch closer, square on, to read
 ];
 /* portrait screens: the lid framed on its printing, and the inside shown one
    column at a time (the chains, then the white box + watch) so a phone can
@@ -464,15 +465,69 @@ function drawPaper(c) {
   g.strokeRect(0, 0, W, H);
 }
 
-/* his greeting, ink only (transparent canvas), where GREET puts it: the one line
-   the 3D paper carries; the whole letter is real text laid over it (.lt-letter) */
-function drawInk(c) {
-  const g = c.getContext("2d"), W = c.width, H = c.height;
-  g.clearRect(0, 0, W, H);
-  g.font = `600 ${H * GREET.fs}px ${HAND}`;
-  g.fillStyle = INK;
+/* one of his little red hearts: left edge x, tip resting on baseline y, s wide */
+function heart(g, x, y, s) {
+  g.save();
+  g.translate(x + s / 2, y - s * 1.05);
+  g.scale(s, s);
+  g.beginPath();
+  g.moveTo(0, 0.28);
+  g.bezierCurveTo(-0.08, 0.02, -0.5, 0.02, -0.5, 0.32);
+  g.bezierCurveTo(-0.5, 0.58, -0.18, 0.72, 0, 0.95);
+  g.bezierCurveTo(0.18, 0.72, 0.5, 0.58, 0.5, 0.32);
+  g.bezierCurveTo(0.5, 0.02, 0.08, 0.02, 0, 0.28);
+  g.fillStyle = HEART;
+  g.fill();
+  g.restore();
+}
+
+/* his whole letter, ink only (transparent canvas): one sheet wide, as many
+   sheets tall as the words need, the greeting where GREET puts it on the first
+   sheet. The paper's shader shows one sheet of it at a time (uWin), scrolled
+   by uOff. Resizes the canvas; returns the letter's length in sheets (>= 1) */
+function drawInk(c, mobile, W) {
+  const P = W * Math.SQRT2; // W: the sheet's width in px (nominal: c is resized below); P: its height
+  let g = c.getContext("2d");
+  const fs = BODY_FS(mobile) * P, lh = fs * 1.3, hw = fs * 0.6, x0 = GREET.x * W, maxW = W - 2 * x0;
+  const font = (n) => `600 ${n}px ${HAND}`;
+  // lay out: word-wrapped lines of { t, x } ("~" = a heart), each with its baseline
+  g.font = font(fs);
+  const sw = g.measureText(" ").width, lines = [];
+  let y = GREET.y * P + GREET.fs * P * 0.45;
+  const wrap = (text, gap) => {
+    let line = null, x = 0;
+    y += gap;
+    for (const t of text.replace(/~/g, " ~ ").split(/\s+/).filter(Boolean)) {
+      const w = t === "~" ? hw : g.measureText(t).width;
+      if (line && t !== "~" && x + sw + w > maxW) line = null; // a heart may hang in the margin, never alone
+      if (!line) { lines.push((line = { y: (y += lh), words: [] })); x = -sw; }
+      line.words.push({ t, x: x + sw });
+      x += sw + w;
+    }
+  };
+  LETTER_FULL.paragraphs.forEach((t, i) => wrap(t, i ? fs * 0.55 : 0));
+  wrap(LETTER_FULL.closing, fs * 1.1);
+  // size: a short rest under the last line; capped for the GPU (lower on phones)
+  const H = Math.max(P, y + 0.2 * P);
+  const k = Math.min(1, (mobile ? 4096 : 8192) / H, Math.sqrt((mobile ? 4e6 : 16e6) / (W * H)));
+  c.width = Math.round(W * k); // resizing clears the canvas and its state
+  c.height = Math.ceil(H * k);
+  g = c.getContext("2d");
+  g.scale(c.width / W, c.width / W);
+  g.fillStyle = g.strokeStyle = INK;
+  g.lineJoin = "round";
   g.textBaseline = "alphabetic";
-  g.fillText(LETTER_FULL.greeting, W * GREET.x, H * GREET.y);
+  // a slightly heavier pen: thin handwriting strokes go grey when the tall
+  // sheet is shrunk onto the paper, so each word is filled and lightly stroked
+  const pen = (t, x, y, size) => { g.lineWidth = size * 0.045; g.fillText(t, x, y); g.strokeText(t, x, y); };
+  g.font = font(GREET.fs * P);
+  pen(LETTER_FULL.greeting, x0, GREET.y * P, GREET.fs * P);
+  g.font = font(fs);
+  for (const l of lines) for (const { t, x } of l.words) {
+    if (t === "~") heart(g, x0 + x, l.y, hw);
+    else pen(t, x0 + x, l.y, fs);
+  }
+  return c.height / (P * (c.width / W));
 }
 
 /* every canvas the scene paints, per screen class: [cache key, w, h, draw, font] */
@@ -490,7 +545,7 @@ function artSpec(mobile) {
     fade: ["fade", 256, 256, drawFade],
     paper,
     hug: [`hug${PL}`, HW, Math.round((HW * Math.SQRT2) / 3), (c) => drawHug(c, art(...paper).c)],
-    ink: [`ink${PL}`, Math.round(PL / Math.SQRT2), PL, drawInk, HAND_FAMILY],
+    ink: [`ink${PL}`, Math.round(PL / Math.SQRT2), PL, (c) => drawInk(c, mobile, Math.round(PL / Math.SQRT2)), HAND_FAMILY],
   };
 }
 
@@ -541,12 +596,14 @@ function panelGeo(v0, dy, segX) {
 }
 
 /* ---------- shaders ---------- */
-/* his greeting, patched into the paper's MeshStandardMaterial. uKx is the paper's
-   current stretch to the reading window's shape: the ink is sampled against it
-   (about the greeting's left edge) so the handwriting itself never stretches */
+/* his letter, patched into the paper's MeshStandardMaterial: the sheet shows
+   one sheet-tall window of the tall ink canvas (uWin of its height), uOff down
+   from its top. flipY puts the canvas's top row at v = 1, so at uOff = 0 the
+   sheet shows exactly the first sheet of it */
 const INK_FRAG = /* glsl */ `
 {
-  vec4 ink = texture2D(uInk, vec2(${GREET.x.toFixed(3)} + (vMapUv.x - ${GREET.x.toFixed(3)}) * uKx, vMapUv.y));
+  float inkV = 1.0 - uOff - (1.0 - vMapUv.y) * uWin;
+  vec4 ink = texture2D(uInk, vec2(vMapUv.x, inkV)) * step(0.0, inkV) * step(inkV, 1.0);
   diffuseColor.rgb = mix(diffuseColor.rgb, ink.rgb, ink.a);
   totalEmissiveRadiance *= 1.0 - ink.a; // the paper glows, the ink stays dark
 }`;
@@ -596,13 +653,12 @@ export function mount(el) {
   capBox.setAttribute("aria-hidden", "true"); // same words as the paragraph above
   const capEls = CAPS.map(([text]) => capBox.appendChild(Object.assign(document.createElement("span"), { textContent: text })));
 
-  // his whole letter, once, as real text: laid exactly over the 3D paper when it
-  // has opened (or, without WebGL, a plain paper card in the flow). Each "~" is
-  // one of his little red hearts
-  const sheet = Object.assign(document.createElement("div"), { className: "lt-letter" });
-  sheet.setAttribute("role", "article");
-  sheet.setAttribute("aria-label", "His letter");
-  const body = sheet.appendChild(Object.assign(document.createElement("div"), { className: "lt-letter-body" }));
+  // his whole letter, once, as real text: for screen readers (the eyes read it
+  // on the 3D paper), and without WebGL a plain paper card in the flow (.lt-flat).
+  // Each "~" is one of his little red hearts
+  const letterEl = Object.assign(document.createElement("div"), { className: "lt-letter" });
+  letterEl.setAttribute("role", "article");
+  letterEl.setAttribute("aria-label", "His letter");
   const para = (text, cls) => {
     const p = Object.assign(document.createElement("p"), cls ? { className: cls } : {});
     text.split("~").forEach((part, i, all) => {
@@ -615,24 +671,26 @@ export function mount(el) {
     });
     return p;
   };
-  body.append(para(LETTER_FULL.greeting, "lt-greet"), ...LETTER_FULL.paragraphs.map((t) => para(t)), para(LETTER_FULL.closing, "lt-close"));
+  letterEl.append(para(LETTER_FULL.greeting, "lt-greet"), ...LETTER_FULL.paragraphs.map((t) => para(t)), para(LETTER_FULL.closing, "lt-close"));
 
-  stage.append(sr, capBox, sheet);
+  stage.append(sr, capBox, letterEl);
   el.classList.add("lt-ready");
 
-  /* scroll plan in px, re-measured on resize and when the fonts change the
-     letter's height: the box timeline over the old track's span, then his
-     words move up through the window (READ_RATE px of scroll per px of text),
-     then a short rest before the section scrolls away */
-  const R = { box: 1, start: 1, len: 1, over: 0 };
+  /* scroll plan in px, re-measured on resize and whenever the ink is (re)drawn:
+     the box timeline over the old track's span, then his words move up through
+     the sheet (READ_RATE px of scroll per px of text on screen), then a short
+     rest before the section scrolls away. over = the letter's length past one
+     sheet, in sheets (from the ink canvas; a guess until it is drawn) */
+  const R = { box: 1, start: 1, len: 1, over: 2 };
   let trackH = 0;
   function measure() {
     if (el.classList.contains("lt-flat")) return;
-    const V = window.innerHeight;
+    const V = window.innerHeight, sw = stage.clientWidth, sh = stage.clientHeight, a = sw / sh || 1;
     R.box = boxSpan();
     R.start = READ_AT * R.box;
-    R.over = Math.max(0, body.offsetHeight - sheet.clientHeight);
-    R.len = Math.max(R.over * READ_RATE, 0.3 * V);
+    // px of screen one sheet fills once the camera is in (layout()'s read beat)
+    const sheetPx = (Math.min(0.84, Math.SQRT2 * (a < 0.8 ? 0.92 : 0.8) * a) / 0.94) * sh;
+    R.len = Math.max(R.over * sheetPx * READ_RATE, 0.3 * V);
     const h = Math.round(stage.offsetHeight + R.start + R.len + 0.15 * V);
     if (Math.abs(h - trackH) < 2) return;
     trackH = h;
@@ -667,8 +725,6 @@ export function mount(el) {
   // no WebGL: fold the track away and leave his letter as a plain paper card
   function flat() {
     el.classList.add("lt-flat");
-    sheet.style.opacity = "";
-    body.style.transform = "";
     window.ScrollTrigger?.refresh(); // track collapsed
     nearIO.disconnect();
     farIO.disconnect();
@@ -687,10 +743,8 @@ export function mount(el) {
   farIO.observe(el);
 
   // the stage is 100svh, so a phone's URL bar never resizes it; page zoom does
-  // (the letter's body too: its height changes when the handwriting face arrives)
   const ro = new ResizeObserver(() => { S?.resize(); measure(); });
   ro.observe(stage);
-  ro.observe(body);
 
   /* =========================================================
      build: one renderer + scene; returns { resize, dispose } or null
@@ -717,7 +771,7 @@ export function mount(el) {
     renderer.shadowMap.autoUpdate = false; // re-rendered only when something moves
 
     let alive = true, raf = 0, sized = false, first = true, sp = 0, lastP = -1, lastVis = "", dirty = true;
-    let lastLO = "", lastLY = "", lastLR = "";
+    let lastLR = "";
     let last = performance.now() / 1000;
     const capOp = CAPS.map(() => "");
     const bag = [];
@@ -802,17 +856,25 @@ export function mount(el) {
     // single-sided panels: without this the open letter, facing the lamp, casts no shadow
     M.paperF.shadowSide = THREE.DoubleSide;
 
-    // his greeting: ink texture patched into the front of the paper
-    const inkU = { uInk: { value: inkTex }, uKx: { value: 1 } };
+    // his letter: the tall ink texture patched into the front of the paper,
+    // one sheet of it at a time; its length sets the reading track
+    const inkU = { uInk: { value: inkTex }, uWin: { value: 1 }, uOff: { value: 0 } };
+    const inkLen = () => { inkU.uWin.value = 1 / inkE.out; R.over = inkE.out - 1; measure(); };
+    inkLen();
     M.paperF.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, inkU);
       sh.fragmentShader = sh.fragmentShader
-        .replace("void main() {", "uniform sampler2D uInk;\nuniform float uKx;\nvoid main() {")
+        .replace("void main() {", "uniform sampler2D uInk;\nuniform float uWin;\nuniform float uOff;\nvoid main() {")
         .replace("#include <map_fragment>", `#include <map_fragment>\n${INK_FRAG}`);
     };
     fontsReady().then(() => {
       if (!alive) return;
-      if (reart(inkE, drawInk, HAND_FAMILY)) { inkTex.needsUpdate = true; dirty = true; } // was drawn in a fallback face
+      if (reart(inkE, A.ink[3], HAND_FAMILY)) { // was drawn in a fallback face: new size, so a new texture
+        inkU.uInk.value.dispose();
+        inkU.uInk.value = tex(inkE.c);
+        inkLen();
+        dirty = true;
+      }
       if (reart(cardE, drawCard, SERIF_FAMILY)) { cardTex.needsUpdate = true; dirty = true; }
     });
 
@@ -973,7 +1035,7 @@ export function mount(el) {
     /* =========================================================
        layout: camera beats + the letter's final pose for this stage shape
        ========================================================= */
-    let curveC = null, curveT = null, keys = KEYS, caps = CAPS, kx = 1;
+    let curveC = null, curveT = null, keys = KEYS, caps = CAPS;
     const Q_END = new THREE.Quaternion(), Q_READ = new THREE.Quaternion(), dummy = new THREE.Object3D();
     function layout() {
       const W = stage.clientWidth, H = stage.clientHeight;
@@ -988,15 +1050,12 @@ export function mount(el) {
       camera.updateProjectionMatrix();
       const vh1 = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), vw1 = vh1 * aspect;
       const fit = (w, h) => Math.max(h / vh1, w / vw1);
-      // the reading window (.lt-letter, sized in css): the paper takes its shape
-      // (kx) and the camera comes to where the paper fills it exactly
-      const ww = sheet.clientWidth, wh = sheet.clientHeight;
-      kx = ww && wh ? ww / wh / (LW / LH) : 1;
       const pos = [], tgt = [];
       for (const k of keys) {
         if (k.letter || k.read) {
-          // portrait: 92% of the width
-          const d = k.read && wh ? (LH * H) / (vh1 * wh) : fit(LW / (tall ? 0.92 : 0.8), LH / 0.84) * (k.letter || 0.94);
+          // 84% of the height, or 80% of the width (portrait: 92%); to read, 0.94 as
+          // far (measure() sizes the reading track from this same framing)
+          const d = fit(LW / (tall ? 0.92 : 0.8), LH / 0.84) * (k.letter || 0.94);
           tgt.push(LETTER_AT.clone());
           pos.push(LETTER_DIR.clone().multiplyScalar(d).add(LETTER_AT));
         } else {
@@ -1043,7 +1102,7 @@ export function mount(el) {
       const kp = Math.min(1, dt * 3);
       ptrS.x += (ptr.x - ptrS.x) * kp;
       ptrS.y += (ptr.y - ptrS.y) * kp;
-      const calm = 1 - rk; // settled to read: no parallax, no breath, so the real text sits exactly on the paper
+      const calm = 1 - rk; // settled to read: no parallax, no breath
       camPos.x += ptrS.x * 0.12 * calm;
       camPos.y += ((t ? Math.sin(t * 0.5) * 0.015 : 0) - ptrS.y * 0.06) * calm; // a slow breath
       camera.position.copy(camPos);
@@ -1058,9 +1117,7 @@ export function mount(el) {
       const r = sstep(...TL.rise, p);
       bez(P_IN, P_MID, LETTER_AT, r, letter.position);
       const ls = S_IN + (1 - S_IN) * sstep(0.05, 0.6, r); // folded small in the white box, full size in the air
-      const sx = 1 + (kx - 1) * rk; // coming in to read, it takes the reading window's shape
-      letter.scale.set(ls * sx, ls, 1);
-      inkU.uKx.value = sx;
+      letter.scale.set(ls, ls, 1);
       letter.quaternion.slerpQuaternions(Q_IN, Q_END, sstep(0.08, 0.92, r));
       letter.rotateX(-Math.sin(Math.PI * r) * 0.35); // paper catching the air
       letter.quaternion.slerp(Q_READ, rk);
@@ -1069,7 +1126,7 @@ export function mount(el) {
       topHinge.position.z = 2 * EPS * (1 - ut);
       botHinge.rotation.x = -(Math.PI + (cr - Math.PI) * ub);
       botHinge.position.z = EPS * (1 - ub);
-      // warms as it turns to us, then brightens towards the real-text paper (never the ink)
+      // warms as it turns to us, then brightens to read (never the ink)
       M.paperF.emissiveIntensity = 0.16 * sstep(0.46, 0.62, p) + 0.45 * rk;
 
       moteMat.uniforms.uTime.value = t;
@@ -1100,11 +1157,9 @@ export function mount(el) {
       const vs = vis.toFixed(3);
       if (vs !== lastVis) { lastVis = vs; stage.style.setProperty("--lt-vis", vs); dirty = true; }
       if (Math.abs(p - lastP) > 1e-5) { lastP = p; renderer.shadowMap.needsUpdate = true; dirty = true; }
-      // his letter: fades in over the paper once the camera has come in, then his
-      // words move up through the window as the page scrolls (teleprompter)
-      const lo = (sstep(...TL.read, p) * vis).toFixed(3), ly = (-rp * R.over).toFixed(1), lr = rk.toFixed(3);
-      if (lo !== lastLO) { lastLO = lo; sheet.style.opacity = lo; }
-      if (ly !== lastLY) { lastLY = ly; body.style.transform = `translate3d(0, ${ly}px, 0)`; }
+      // his words move up through the sheet as the page scrolls, to the last line
+      const off = rp * (1 - inkU.uWin.value), lr = rk.toFixed(3);
+      if (off !== inkU.uOff.value) { inkU.uOff.value = off; dirty = true; }
       if (lr !== lastLR) { lastLR = lr; stage.style.setProperty("--lt-read", lr); } // lifts the vignette off the paper
       if (REDUCED && !dirty) return; // nothing moves on its own: redraw only when scroll changes the frame
       dirty = false;
@@ -1125,7 +1180,6 @@ export function mount(el) {
         cv.remove();
         stage.style.setProperty("--lt-vis", "0");
         stage.style.setProperty("--lt-read", "0");
-        sheet.style.opacity = "0";
         capEls.forEach((c) => { c.style.opacity = "0"; });
         // compileAsync polls the programs until they link; tearing the renderer
         // down under it would throw, so free the GPU side once it has settled
