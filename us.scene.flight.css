@@ -267,20 +267,6 @@
 .ft-bar-stops span:last-child { transform: translateX(-100%); text-align: right; }
 .ft-bar-stops b { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; color: var(--ink); }
 
-/* CC-BY credit for the plane model */
-.ft-credit {
-  position: absolute;
-  z-index: 3;
-  right: 84px; /* clear of the fixed music button */
-  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-  margin: 0;
-  font-size: 10px;
-  letter-spacing: 0.02em;
-  color: rgba(147, 166, 207, 0.55);
-}
-.ft-credit[hidden] { display: none; }
-.ft-credit a { color: inherit; text-decoration: underline; text-decoration-color: rgba(147, 166, 207, 0.3); text-underline-offset: 2px; }
-.ft-credit a:hover { color: var(--ink); }
 
 /* the whole trip as text (screen readers; shown when there is no WebGL) */
 .ft-sr {
@@ -331,10 +317,9 @@
   .ft-status { grid-area: status; margin-top: 8px; font-size: 12px; }
 
   .ft-caption { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); font-size: clamp(1.7rem, 7.4vw, 2.4rem); }
-  /* timeline + credit stop short of the fixed music button in the corner */
+  /* the timeline stops short of the fixed music button in the corner */
   .ft-bar { bottom: calc(38px + env(safe-area-inset-bottom, 0px)); left: 16px; right: 76px; width: auto; transform: none; }
   .ft-bar-stops { font-size: 10px; }
-  .ft-credit { left: 16px; right: 76px; font-size: 9px; text-align: left; }
 
   .ft-lbl-apt > span, .ft-lbl-city > span { font-size: 10px; }
   .ft-lbl-region > span { font-size: 9px; letter-spacing: 0.26em; }

@@ -608,12 +608,8 @@ export function mount(el) {
   for (const [n, la, lo] of REGIONS) addLabel("ft-lbl-region", la, lo, 0, 46, 80, (s) => { s.textContent = n; });
   for (const [n, la, lo] of SEAS) addLabel("ft-lbl-sea", la, lo, 0, 46, 80, (s) => { s.textContent = n; });
 
-  // CC-BY credit for the plane model, shown once it is on screen
-  const credit = h("p", "ft-credit");
-  credit.hidden = true;
-  credit.innerHTML = `plane: <a href="https://poly.pizza/m/fzIXe2paBN9" target="_blank" rel="noopener">“Airplane” by Poly by Google</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC-BY 3.0</a>, via Poly Pizza · map: Natural Earth`;
 
-  stage.append(h("div", "ft-vig"), labelsEl, callout, hud, caption, bar, credit, sr);
+  stage.append(h("div", "ft-vig"), labelsEl, callout, hud, caption, bar, sr);
   el.classList.add("ft-ready");
 
   let S = null, near = false;
@@ -801,7 +797,10 @@ export function mount(el) {
         const g = new THREE.Group();
         g.quaternion.copy(rw.quaternion);
         g.position.copy(rw.position);
-        api.root.position.x += 0.45;
+        // Lahore: turned to the far side of the runway, where the take-off camera looks
+        const far = code === "lhe";
+        api.root.position.x += far ? -0.45 : 0.45;
+        if (far) api.root.rotation.z += Math.PI;
         g.add(api.root);
         const mats = [];
         api.root.traverse((o) => {

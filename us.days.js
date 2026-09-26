@@ -38,7 +38,7 @@ export const DAYS = [
   "The clocks there went back an hour last night. You got a free hour of sleep, and now I'm five hours ahead of you instead of four. It'll be dark by five, so switch the lights on early and don't let the dark decide your mood.",  // day 35
   "Dark before the day is even done. Strange, isn't it? Close the curtains, put on something you like, make it cosy. The dark is only outside.",  // day 36
   "Rainy nights still take me straight back to us. That first mirror selfie, both of us in black, both grinning. Every time it rains there, you're walking through that memory a little.",  // day 37
-  "Play Photograph on your walk today, the song on this page. For four minutes we'll be listening to the same thing, even if it's hours apart. It's the closest thing I have to walking next to you.",  // day 38
+  "Play Alfaaz on your walk today, the song on this page. For those few minutes we'll be listening to the same thing, even if it's hours apart. It's the closest thing I have to walking next to you.",  // day 38
   "Somewhere in the middle of all this new, do something you actually enjoy. Not useful, not productive. Just yours.",  // day 39
   "If someone there has been kind to you, thank them properly. Kindness is easier to find in a new city once you start noticing it out loud.",  // day 40
   "That's October finished. Your first full month there, with its cold, its rain and the first early evenings, done. November you is going to be even tougher than October you.",  // day 41
